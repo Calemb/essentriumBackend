@@ -111,8 +111,8 @@ function onAuthorizeFail(data, message, error, accept) {
 //     }
 // });
 app.use('/', require('./routes/index'));
-// app.use('/login', require('./routes/login'));
-// app.use('/logout', require('./routes/logout'));
+app.use('/login', require('./routes/login'));
+app.use('/logout', require('./routes/logout'));
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
