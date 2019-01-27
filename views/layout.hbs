@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{title}}</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="/javascripts/socket.io.js"></script>
+    <!--
+     Is that good idea to use just jQuery ajax to load page content where I don't need bi-directional communication ?
+   -->
+    <script src="/javascripts/jquery.js"></script>
+    <!-- own script -->
+    <script src="/javascripts/Util.js"></script>
+</head>
+<body>
+    <canvas id="cMain"></canvas>
+    {{{body}}}
+</body>
+</html>

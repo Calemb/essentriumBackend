@@ -1,0 +1,1 @@
+supervisor -w public,routes,views,app.js app.js
