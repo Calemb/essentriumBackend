@@ -11,13 +11,17 @@ const MongoStore = require('connect-mongo')(session);
 var cors = require('cors')
 
 const sessStore = new MongoStore({
-    url: 'mongodb://localhost/newVall',
+    url: 'mongodb://localhost/essentrium',
     touchAfter: 24 * 3600 // time period in seconds
 });
 var passportSocketIo = require('passport.socketio');
 
 var app = express();
-app.use(cors())
+app.use(cors({
+origin: 'http://localhost:3001',
+credentials: true
+}))
+
 app.use(cookieParser('key cat', {}));
 app.use(session({
     store: sessStore,
