@@ -5,16 +5,17 @@ var router = express.Router();
 router.get('/', function (req, res, next) {
     //PRAWDZIWE LOGOWANIE NASTEPUJE PONIZEJ
     var sess = req.session;
-    console.log(req.cookies)
-    console.log("sesja: " + JSON.stringify(sess));
-    
+    console.log("ciastka: " + JSON.stringify(req.cookies))
+    console.log("sesja: " + JSON.stringify(sess))
+
 
     //render
-    res.json({
-        mail: sess.email,
-        data: sess.id,
-        cookie: sess.cookie
-    });
+    res
+        .json({
+            mail: sess.email,
+            data: sess.id
+        }).end()
+    // .status(200)
 });
 
 module.exports = router;
