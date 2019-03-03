@@ -8,7 +8,11 @@ router.post('/', sessionCfg.plain, function (req, res, next) {
     console.log(req.body)
     console.log("ciastka: " + JSON.stringify(req.cookies))
     console.log("req.sess" + JSON.stringify(sess))
-
+    
+    sess.email = req.body.email //verify with db
+    res.json({
+        location: 'game'
+    }).end()
     //session verification must be in separate module and chek on every stricted request!
     //if check fail -> response 404 or sth?
 
@@ -21,7 +25,6 @@ router.post('/', sessionCfg.plain, function (req, res, next) {
     //     //base on those -> verify with db
     //     //set session params (like real email or sth)
     //     //from this point any restricted pages should be accesible for user
-    sess.email = req.body.email //verify with db
 
     // }
 
@@ -38,12 +41,8 @@ router.post('/', sessionCfg.plain, function (req, res, next) {
     //  console.log("session: " + req.cookies.cookieName);
     // res.cookie({ name: 'key cat' })
     // res.send()
-    res
-        .status(200)
-        .json({
-            mail: sess.email
-        })
-        .end()
+    // res.redirect('/');//to game path or StyleSheet..
+    // res.sendFile(__dirname + '/game.html')
 });
 
 module.exports = router;
