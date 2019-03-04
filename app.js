@@ -10,7 +10,7 @@ var Server = require('http').Server;
 // const MongoStore = require('connect-mongo')(session);
 var cors = require('cors')
 var sessionCfg = require('./local_modules/session.js')
-
+var routeTable = require('./routeTable.js')
 // const sessStore = new MongoStore({
 //     url: 'mongodb://127.0.0.1/essentrium',
 //     touchAfter: 24 * 3600 // time period in seconds
@@ -63,37 +63,28 @@ function onAuthorizeFail(data, message, error, accept) {
     return accept(new Error(message));
 }
 
-//SERVE game and not log in part as separate web page
-//to separate page frame
-
 //=>MAIN FRONTEND(nuxt page)
 app.use('/', require('./routes/index'));
-//=>MAIN GAME FRONTEND(nuxt page)
 
-//SORT APIS based on auth requirements
 app.use('/login', require('./routes/login'));
-
 app.use('/game', require('./routes/game'));
-// const whiteList = ['test']
 const gameSubDir = 'public/game/game'
-const routeTable = {
-    'test': 'test-routes/test'
-}
+
 app.use('/game/:subGame', sessionCfg.strict,
     (req, res, next) => {
         var subGame = req.params.subGame
         console.log(routeTable[subGame])
         if (typeof routeTable[subGame] != 'undefined') {
-            var subRoute = require('./routes/' + routeTable[subGame])
+
+            var routeName = routeTable[subGame] === '' ? subGame : routeTable[subGame];
+            var subRoute = require('./routes/' + routeName)
             res.__dirname = path.join(__dirname, gameSubDir)
             subRoute(req, res, next)
-            // res.sendFile(path.join(__dirname, '../public/game/' + routeTable[subGame], 'index.html'))
-            // res.json({ routeName: subGame })
         }
         else {
             res.json({ msg: 'not permited at routing whiteList' })
         }
-    }//require('./routes/test')
+    }
 );
 
 app.use('/logout', require('./routes/logout'));
