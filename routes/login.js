@@ -2,17 +2,33 @@ var express = require('express');
 var router = express.Router();
 var sessionCfg = require('../local_modules/session.js')
 /* GET users listing. */
+var account = require('../store/account.js')
 
 router.post('/', sessionCfg.plain, function (req, res, next) {
     var sess = req.session
     console.log(req.body)
     console.log("ciastka: " + JSON.stringify(req.cookies))
     console.log("req.sess" + JSON.stringify(sess))
-    
-    sess.email = req.body.email //verify with db
-    res.json({
-        location: 'game'
-    }).end()
+
+    var findedAccout = account.find(req.body.email,
+        req.body.password,
+        (err, result) => {
+            console.log(result)
+            if (result) {
+                sess.pass = result.password
+                sess.email = result.email //verify with db
+                res.json({
+                    location: 'game'
+                }).end()
+            }
+            else {
+                res.json({
+                    msg: 'wrong data',
+                })
+            }
+        })
+
+
     //session verification must be in separate module and chek on every stricted request!
     //if check fail -> response 404 or sth?
 
