@@ -95,21 +95,11 @@ app.use(express.static(path.join(__dirname, 'public/main')));
 app.use(express.static(path.join(__dirname, 'public/game')));
 
 
-var mongo = require('mongodb').MongoClient;
-var myDb;
-
-
+var store = require('./store/store.js')
 
 server.listen(3000, function () {
     console.log('Listening on: ' + 3000);
-    //localhost/dbName
-    // mongo.connect("mongodb://localhost/test", function(err, db) {
-    //     if (err) {
-    //         console.warn(err.message);
-    //     } else {
-    //         myDb = db;
-    //     }
-    // });
+    store.connect()
 });
 io.on('connection', function (socket) {
     var cookie_string = socket.request.headers.cookie;
