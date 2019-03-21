@@ -13,7 +13,7 @@ router.post('/', sessionCfg.plain, function (req, res, next) {
     var findedAccout = account.find(req.body.email,
         req.body.password,
         (err, result) => {
-            console.log(result)
+            console.log("Result is: " + result)
             if (result) {
                 sess.pass = result.password
                 sess.email = result.email //verify with db

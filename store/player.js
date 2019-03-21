@@ -1,4 +1,4 @@
-var store = require('./store.js')
+var store = require('../local_modules/store.js')
 
 const player = {};
 player.find = function (id, next) {

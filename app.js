@@ -19,7 +19,7 @@ var routeTable = require('./routeTable.js')
 
 var app = express();
 app.use(cors({
-    origin: ['http://127.0.0.1:3001', 'http://127.0.0.1:3002'],
+    origin: ['http://127.0.0.1:3000','http://127.0.0.1:3001', 'http://127.0.0.1:3002'],
     credentials: true
 }))
 
@@ -68,14 +68,13 @@ app.use('/', require('./routes/index'));
 
 app.use('/login', require('./routes/login'));
 app.use('/game', require('./routes/game'));
-const gameSubDir = 'public/game/game'
+const gameSubDir = 'public/game/'
 
 app.use('/game/:subGame', sessionCfg.strict,
     (req, res, next) => {
         var subGame = req.params.subGame
         console.log(routeTable[subGame])
         if (typeof routeTable[subGame] != 'undefined') {
-
             var routeName = routeTable[subGame] === '' ? subGame : routeTable[subGame];
             var subRoute = require('./routes/' + routeName)
             res.__dirname = path.join(__dirname, gameSubDir)
@@ -95,7 +94,7 @@ app.use(express.static(path.join(__dirname, 'public/main')));
 app.use(express.static(path.join(__dirname, 'public/game')));
 
 
-var store = require('./store/store.js')
+var store = require('./local_modules/store.js')
 
 server.listen(3000, function () {
     console.log('Listening on: ' + 3000);
