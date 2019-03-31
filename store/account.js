@@ -5,8 +5,8 @@ account.find = function (email, password, next) {
     // console.log("Find: ", email, password)
     store.db.collection('accounts')
         .findOne({
-            email: email,
-            password: password
+            email,
+            password
         }, next)
 }
 module.exports = account

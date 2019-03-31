@@ -29,6 +29,7 @@ var sessionVerify = function (req, res, next) {
         // console.table(req.session)
         account.find(req.session.email, req.session.pass, (err, result) => {
             // console.table(result)
+            if (err) { res.json(err) }
             req.body._id = result._id
             console.log('there is session', result._id)
             next()

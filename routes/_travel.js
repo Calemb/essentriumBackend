@@ -7,14 +7,23 @@ const camps = store.db.collection('camps')
 router.get('/', (req, res, next) => {
   // console.table(req.body)
   travel.findOne(req.body._id, (err, travelResult) => {
-    camps.findOne({ owner: req.body._id }, (err, campResult) => {
-
-      res.json({
-        coords: travelResult.coords,
-        coordsInner: travelResult.coordsInner,
-        camp: campResult
+    if (err) {
+      res.json(err)
+    }
+    else {
+      camps.findOne({ owner: req.body._id }, (err, campResult) => {
+        if (err) {
+          res.json(err)
+        }
+        else {
+          res.json({
+            coords: travelResult ? travelResult.coords : {},
+            coordsInner: travelResult ? travelResult.coordsInner : {},
+            camp: campResult
+          })
+        }
       })
-    })
+    }
   });
 });
 
