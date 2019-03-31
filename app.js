@@ -15,8 +15,6 @@ const sessStore = new MongoStore({
   url: 'mongodb://127.0.0.1/essentrium',
   touchAfter: 24 * 3600 // time period in seconds
 });
-var passportSocketIo = require('passport.socketio');
-
 var app = express();
 app.use(cors({
   origin: ['http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3002'],
@@ -30,46 +28,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
-
 var server = Server(app);
 
-var io = require('socket.io')(server);
-
-io.use(function (socket, next) {
-  console.log(socket.handshake)
-  // let data = socket //|| socket.request
-  // console.log(data.headers.cookie);
-  next()
-})
-io.set('authorization', passportSocketIo.authorize({
-  cookieParser: cookieParser,
-  resave: true,
-  saveUninitialized: true,
-  key: 'express.sid',
-  secret: 'keycat',
-  store: sessStore,
-  name: 'express.sid',
-  success: onAuthorizeSuccess,
-  fail: onAuthorizeFail,
-}));
-
-function onAuthorizeSuccess(data, accept) {
-  // console.log(data)
-  //     // console.log(data)
-  console.log('OK')
-  //     console.log("OK connected!");
-  //     accept();
-}
-
-function onAuthorizeFail(data, message, error, accept) {
-  // console.log(data)
-  console.log("go away: " + error); //error is once true and once false
-  // console.log(data);
-  // if (error)
-  //   accept(new Error(message));
-
-  // return accept(new Error(message));
-}
 
 //=>MAIN FRONTEND(nuxt page)
 app.use('/', require('./routes/index'));
@@ -104,28 +64,60 @@ app.use(express.static(path.join(__dirname, 'public/game')));
 
 var store = require('./local_modules/store.js')
 
-server.listen(3000, function () {
+server.listen(3000, () => {
   console.log('Listening on: ' + 3000);
   store.connect()
 });
-io.on('connection', function (socket) {
-  console.log(socket.request.headers)
-  var cookie_string = socket.request.headers.cookie;
-  console.log("cookie string: " + cookie_string)//here in cookie I get express sid
-  //link it to session storage and validate if there si email set?! or before on auth 
-  // console.log("on connected: " + JSON.stringify(socket.handshake));
-  // // console.log("on connected: " + JSON.stringify(socket.request));
-  // console.log("on connected: " + JSON.stringify(socket.cookie));
+const parseCookie = (auth, cookieHeader) => {
+  var cookieParser = auth.cookieParser(auth.secret);
+  var req = {
+    headers: {
+      cookie: cookieHeader
+    }
+  };
+  var result;
+  cookieParser(req, {}, function (err) {
+    if (err) throw err;
+    result = req.signedCookies || req.cookies;
+  });
+  return result;
+}
+var io = require('socket.io')(server);
+io.set('authorization',
+  (data, callback) => {
+    const settings = {
+      cookieParser: cookieParser,
+      resave: true,
+      saveUninitialized: true,
+      key: 'express.sid',
+      secret: 'keycat',
 
-  // socket.on('login', function (data) {
-  //     //data -> login and pass to future compare with DB
-  //     console.log(data);
-  //     console.log("**");
-  //     //socket.request.session - undefined
-  //     console.log(socket.request);
-  // });
+      store: sessStore,
+      name: 'express.sid'
+    }
 
-  socket.on('msg', function (arg, func) {
+    var parsed = parseCookie(settings, data.headers.cookie)[settings.key]
+    settings.store.get(parsed, (err, session) => {
+      if (err) {
+        console.log(err)
+        callback(new Error(err), false)
+      }
+      else {
+        // console.log(session)
+
+        if (!session) {
+          callback(new Error('Socket session not found!'), false)
+        }
+        else {
+          callback(null, true)
+        }
+      }
+    })
+  }
+);
+io.on('connection', (socket) => {
+  console.log('socket connected!')
+  socket.on('msg', (arg, func) => {
     //func make callback to frontend
     console.log("SOcket log me sth");
     console.log(arg);
