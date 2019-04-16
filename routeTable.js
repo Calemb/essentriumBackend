@@ -4,7 +4,8 @@
 routeTable = {
     '_player': '',
     '_player-fast': '',
-    '_travel': ''
+    '_travel': '',
+    'guild': ''
 }
 
 module.exports = routeTable
