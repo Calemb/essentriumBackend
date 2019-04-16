@@ -32,7 +32,7 @@ router.post('/', (req, res, next) => {
   const camp = req.body.camp
   if (requestedChange) {
 
-    changeDirection();
+    changeDirection(req, res, requestedChange);
   }
 
   if (camp) {
@@ -42,10 +42,14 @@ router.post('/', (req, res, next) => {
 
 })
 
-changeDirection = () => {
+changeDirection = (req, res, requestedChange) => {
   const inner = { minX: 0, maxX: 9, minY: 0, maxY: 9 }
 
-  travel.findOne(req.body._id, (err, result) => {
+  travel.findOne(req.body._id, (err, results) => {
+    const result = results || {
+      coords: { x: 0, y: 0, z: 0 },
+      coordsInner: { x: 0, y: 0, z: 0 }
+    }
     const directionToCoords = {
       'N': {
         delta: { x: 0, y: 1, z: 0 },
