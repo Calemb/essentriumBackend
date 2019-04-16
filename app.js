@@ -9,7 +9,7 @@ var Server = require('http').Server;
 var cors = require('cors')
 var sessionCfg = require('./local_modules/session.js')
 var routeTable = require('./routeTable.js')
-
+const chalk = require('chalk')
 var app = express();
 app.use(cors({
   origin: ['http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3002'],
@@ -43,6 +43,7 @@ app.use('/game/:subGame', sessionCfg.strict,
       subRoute(req, res, next)
     }
     else {
+      console.log(chalk.red(req.originalUrl + ' -> not permitted at routing whiteList'))
       res.json({ msg: 'not permited at routing whiteList' })
     }
   }
@@ -60,6 +61,7 @@ server.listen(3000, () => {
   console.log('Listening on: ' + 3000);
   store.connect()
 });
-const ioChat = require('./io-chat')(server)
+const ioChat = require('./io-chat')
+ioChat.init(server)
 
 module.exports = app;

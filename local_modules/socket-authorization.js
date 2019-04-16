@@ -1,5 +1,7 @@
 
 const parseCookie = require('./socket-parse-cookie')
+const account = require('../store/account')
+const player = require('../store/player')
 const socketAuthorization = (data, callback) => {
   const { settings } = require('./session-settings')
 
@@ -11,13 +13,17 @@ const socketAuthorization = (data, callback) => {
       callback(new Error(err), false)
     }
     else {
-      // console.log(session)
+      console.log(session)
 
       if (!session) {
         callback(new Error('Socket session not found!'), false)
-      }
-      else {
-        callback(null, true)
+      } else {
+        account.find(session.email, session.pass, (err, result) => {
+          player.find(result._id, (err, resultPlayer) => {
+            data.name = resultPlayer.name
+            callback(null, true)
+          })
+        })
       }
     }
   })

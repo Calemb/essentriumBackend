@@ -1,55 +1,54 @@
 
-const ioChat = (server) => {
 
+const ioChat = {
+  io: {},
+  // guildSockets: [],
+  // citySockets:[],
+  // locationSockets: [],
+  init: function (server) {
+    this.io = require('socket.io')(server);
+    const socketAuth = require('./local_modules/socket-authorization')
+    this.io.set('origins', "http://127.0.0.1:3002")
+    this.io.set('authorization', socketAuth);
 
-  var io = require('socket.io')(server);
-  const socketAuth = require('./local_modules/socket-authorization')
-  // io.origins("http://127.0.0.1:3002")
-  io.set('origins', "http://127.0.0.1:3002")
-  io.origins((origin, callback) => {
-    console.log(origin)
+    //read cities, guilds form server at start!
 
-    callback(null, true)
-  })
-  io.set('authorization', socketAuth);
-
-  const ioLocation = io.of('/location')
-  const ioCity = io.of('/testCityName')
-  const ioGuild = io.of('/testGuildName')
-
-  ioGuild.on('connection', (socket) => {
-    console.log('conntected!')
-
-    socket.on('msg', (msg) => {
-      console.log('msg income: ' + msg)
-      socket.broadcast.emit('msg', msg)
+    const locationSocket = this.io.of('/location')
+    locationSocket.on('connection', (socket) => {
+      socket.on('msg', (msg, callback) => {
+        // FILTER CLIENTS THAT RECEIVE THIS MSG!
+        // socket.broadcast.emit('msg', msg)
+        socket.broadcast.emit('msg', { msg, name: socket.client.request.name })
+        callback()
+      })
     })
-  });
-  // ioGuild.on('connection', (socket) => {
-  //   console.log("SOCKET id: " + socket.id)
-  //   // console.log(socket.handshake)
-  //   // ioGuild
-  //   socket.on('msg', function (a, fn) {
-  //     console.table("Da: ")
-  //   });
+    /*
+    DEV PURPOSE
+    */
+    this.AddNamespaceSocket('testCityName')
+    this.AddNamespaceSocket('testGuildName')
+    /***/
+  },
+  AddNamespaceSocket: function (namespaceName) {
+    const namespaceSocket = this.io.of('/' + namespaceName)
+    this.PrepareSocket(namespaceSocket)
+  },
+  // AddNamespaceSocket('testGuildName')
+  PrepareSocket: (newSocket) => {
 
-  //   socket.on('disconnect', (reason) => {
-  //     console.log("discon: " + reason)
-  //   })
+    newSocket.on('connection', (socket) => {
+      console.log('conntected!')
 
-  //   socket.emit('msg', { msg: 'test' })//broadcast.emit?
-  //   console.log('connected with testGuildName socket');
-  // })
+      socket.on('msg', (msg) => {
+        //FILLED ON AUTHORIZATION DATA
+        // console.log(socket.client.request.name)
+        // console.log('msg income: ' + msg)
 
-  ioCity.on('connection', (socket) => {
-
-    console.log('connected with testCityName socket');
-  })
-
-  ioLocation.on('connection', (socket) => {
-    console.log('connected with Location socket');
-  });
-
+        //push msg to others
+        socket.broadcast.emit('msg', { msg, name: socket.client.request.name })
+      })
+    });
+  }
 }
 
 module.exports = ioChat
