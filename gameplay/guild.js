@@ -1,5 +1,7 @@
 const store = require('../local_modules/store')
+const playerUtil = require('./player')
 const guild = store.db.collection('guilds')
+const chatMgr = require('../io-chat')
 //
 // INNER FUNCTIONS
 //
@@ -37,6 +39,7 @@ const pullPlayerOutOfGuild = function (playerId, guildId) {
         //remove whole guild! this is the only member
         guild.remove({ _id: foundGuild._id }, (err, removeResults) => {
           console.log("remove guild!", err, removeResults)
+          chatMgr.RemoveNamespaceSocket(foundGuild.name)
         })
       }
     }
@@ -58,8 +61,33 @@ const findMyGuild = function (id, resultCallback) {
   )
 }
 const gameplay = {
+  setRole: function (req, res, next) {
+    const memberId = req.body.memberId
+    const newRole = req.body.newRole
+    //verify if req user is admin
+    //verify if new role is admin/subadmin/member
+    //set memberIu new role
+    findMyGuild(req.body._id, (err, result) => {
+      console.log(result);
+
+      const selfMember = findMemberWithId(result.members, req.body._id)
+      if (selfMember.role === gameplay.ADMIN && (
+        newRole === gameplay.ADMIN || newRole === gameplay.SUB_ADMIN || newRole === gameplay.MEMBER
+      )) {
+        guild.updateOne({
+          members: { $elemMatch: { _id: store.ObjectId(memberId) } }
+        }, {
+            $set: { 'members.$.role': newRole }
+          }, (err, findedUser) => {
+            if (err) { res.json(err) }
+            else {
+              res.json(findedUser)
+            }
+          })
+      }
+    })
+  },
   requestDecision: function (req, res, next) {
-    //WORKING accept & deny request -> cause empty db?
     console.log('my decision: ' + req.params.decision)
     console.log('id: ' + req.params.id)
     //find request!
@@ -130,18 +158,26 @@ const gameplay = {
     console.log('player id ' + store.ObjectId(req.body._id))
 
     //only delete this guild, where player has admin priviliges!
-    guild.remove({ _id: store.ObjectId(req.params.id), members: { _id: store.ObjectId(req.body._id), role: 'admin' } }, (err, result) => {
-      if (err) { res.json(err) }
-      else {
-        res.json(result)
-      }
+    guild.findOne({
+      _id: store.ObjectId(req.params.id)
+    }, (err, findResult) => {
+      chatMgr.RemoveNamespaceSocket(findResult.name)
     })
+    guild.remove({
+      _id: store.ObjectId(req.params.id),
+      members: { _id: store.ObjectId(req.body._id), role: 'admin' }
+    },
+      (err, result) => {
+        if (err) { res.json(err) }
+        else {
+          res.json(result)
+        }
+      })
     console.log("*** DELETE END ***")
   },
   createGuild: function (req, res, next) {
     console.log('CREATE NEW GUILD')
     const playerId = req.body._id
-    const playerObjectId = store.ObjectId(playerId)
     const guildName = req.body.name
 
     guild
@@ -164,6 +200,7 @@ const gameplay = {
               (err, result) => {
                 if (err) { res.json(err) }
                 else {
+                  chatMgr.AddNamespaceSocket(guildName)
                   res.json(result)
                 }
               })
@@ -175,12 +212,12 @@ const gameplay = {
   },
   myGuild: function (req, res, next) {
     console.log("*** MY ***");
-    //TODO link players id with theirs names!
     //search only for playerguild
     findMyGuild(req.body._id,
       (err, result) => {
         if (err) { res.json(err) }
-        else if (result) {
+        if (result) {
+
           const selfMember = findMemberWithId(result.members, req.body._id)
           if (selfMember.role === 'admin' || selfMember.role === 'subadmin') {
             guild.find({
@@ -190,10 +227,19 @@ const gameplay = {
                 res.json({ err, errRequests })
               } else {
                 console.log(requests.data);
-
-                res.json({ guild: result, requests: requests })
+                let waitCounter = 0
+                result.members.forEach(member => {
+                  waitCounter += 1
+                  playerUtil.idToName(member._id, (err, data) => {
+                    waitCounter -= 1
+                    member.name = data.name
+                    console.log(data.name);
+                    if (waitCounter == 0) {
+                      res.json({ guild: result, requests: requests })
+                    }
+                  })
+                })
               }
-
             })
           }
           else {
@@ -201,7 +247,19 @@ const gameplay = {
             if (err) {
               res.json(err)
             } else {
-              res.json(result)
+              let waitCounter = 0
+              //FEATURE [far] porwania innych graczy ale tlyko z guildi żeby miał ich kto odbijać! Musi być fun dla obu stron! zostawianie śladów, info że się przemieszczsacie dla porwanego
+              result.members.forEach(member => {
+                waitCounter += 1
+                playerUtil.idToName(member._id, (err, data) => {
+                  waitCounter -= 1
+                  member.name = data.name
+                  console.log(data.name);
+                  if (waitCounter == 0) {
+                    res.json({ guild: result })
+                  }
+                })
+              })
             }
           }
         }
@@ -224,10 +282,6 @@ const gameplay = {
       }
     })
   },
-
-
-
-  //TODO - set users priviliges (admin only)!
 
   ADMIN: 'admin',
   SUB_ADMIN: 'subadmin',

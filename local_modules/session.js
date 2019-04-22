@@ -3,6 +3,7 @@ var account = require('../store/account.js')
 var sessionCookie = require('./session-cookie.js')
 
 var sessionVerify = function (req, res, next) {
+    req.session.email = 'fake@gmail.com';
     req.session.email = 'calemb@gmail.com';
     req.session.pass = '1234';
     console.log('session.js JUST inject fake session data!!!!!');

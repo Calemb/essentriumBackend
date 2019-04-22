@@ -2,7 +2,7 @@
 
 const ioChat = {
   io: {},
-  // guildSockets: [],
+  namespaceSockets: [],
   // citySockets:[],
   // locationSockets: [],
   init: function (server) {
@@ -30,8 +30,11 @@ const ioChat = {
     /***/
   },
   AddNamespaceSocket: function (namespaceName) {
-    const namespaceSocket = this.io.of('/' + namespaceName)
-    this.PrepareSocket(namespaceSocket)
+    this.namespaceSockets[namespaceName] = this.io.of('/' + namespaceName)
+    this.PrepareSocket(this.namespaceSockets[namespaceName])
+  },
+  RemoveNamespaceSocket: function (namespaceName) {
+    delete this.namespaceSockets[namespaceName];
   },
   // AddNamespaceSocket('testGuildName')
   PrepareSocket: (newSocket) => {
