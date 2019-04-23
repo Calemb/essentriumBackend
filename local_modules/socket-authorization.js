@@ -5,7 +5,7 @@ const player = require('../store/player')
 const socketAuthorization = (data, callback) => {
   const { settings } = require('./session-settings')
 
-  console.log("Verify socket......")
+  // console.log("Verify socket......")
   const parsedCookie = parseCookie(settings, data.headers.cookie)[settings.key]
   settings.store.get(parsedCookie, (err, session) => {
     if (err) {
@@ -13,7 +13,7 @@ const socketAuthorization = (data, callback) => {
       callback(new Error(err), false)
     }
     else {
-      console.log(session)
+      // console.log(session)
 
       if (!session) {
         callback(new Error('Socket session not found!'), false)

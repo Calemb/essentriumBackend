@@ -17,7 +17,7 @@ const ioChat = {
     const locationSocket = this.io.of('/location')
     locationSocket.on('connection', (socket) => {
       const socketPlayer = socket.client.request.player
-      console.log("socketname:", socketPlayer)
+      // console.log("socketname:", socketPlayer)
       const findIndex = this.players.findIndex(obj =>
         obj._id == socketPlayer._id.toString()
       )
@@ -52,7 +52,7 @@ const ioChat = {
   PrepareSocket: (newSocket) => {
 
     newSocket.on('connection', (socket) => {
-      console.log('conntected!')
+      console.log('conntected!', socket.id)
 
       socket.on('msg', (msg) => {
         //FILLED ON AUTHORIZATION DATA
