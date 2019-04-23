@@ -6,8 +6,8 @@ const socketAuthorization = (data, callback) => {
   const { settings } = require('./session-settings')
 
   console.log("Verify socket......")
-  var parsed = parseCookie(settings, data.headers.cookie)[settings.key]
-  settings.store.get(parsed, (err, session) => {
+  const parsedCookie = parseCookie(settings, data.headers.cookie)[settings.key]
+  settings.store.get(parsedCookie, (err, session) => {
     if (err) {
       console.log(err)
       callback(new Error(err), false)
@@ -20,7 +20,7 @@ const socketAuthorization = (data, callback) => {
       } else {
         account.find(session.email, session.pass, (err, result) => {
           player.find(result._id, (err, resultPlayer) => {
-            data.name = resultPlayer.name
+            data.player = { _id: result._id.toString(), name: resultPlayer.name }
             callback(null, true)
           })
         })

@@ -5,6 +5,7 @@ const ioChat = {
   namespaceSockets: [],
   // citySockets:[],
   // locationSockets: [],
+  players: [],
   init: function (server) {
     this.io = require('socket.io')(server);
     const socketAuth = require('./local_modules/socket-authorization')
@@ -15,10 +16,21 @@ const ioChat = {
 
     const locationSocket = this.io.of('/location')
     locationSocket.on('connection', (socket) => {
+      const socketPlayer = socket.client.request.player
+      console.log("socketname:", socketPlayer)
+      const findIndex = this.players.findIndex(obj =>
+        obj._id == socketPlayer._id.toString()
+      )
+      if (findIndex === -1) {
+        this.players.push(socketPlayer)
+      }
+      //WORKING others get single player update, new player gets whole list
+      socket.emit('list', this.players)
+      socket.broadcast.emit('new-player', socketPlayer)
       socket.on('msg', (msg, callback) => {
         // FILTER CLIENTS THAT RECEIVE THIS MSG!
         // socket.broadcast.emit('msg', msg)
-        socket.broadcast.emit('msg', { msg, name: socket.client.request.name })
+        socket.broadcast.emit('msg', { msg, name: socketPlayer.name })
         callback()
       })
     })
