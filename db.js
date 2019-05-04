@@ -10,7 +10,7 @@ const playerData = (id) => {
         name: 'Player Name',
         hp: 10,
         strength: 1.0,
-        toghness: 1.0,
+        toughness: 1.0,
         willpower: 1.0
     }
 

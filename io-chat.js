@@ -24,7 +24,6 @@ const ioChat = {
       if (findIndex === -1) {
         this.players.push(socketPlayer)
       }
-      //WORKING others get single player update, new player gets whole list
       socket.emit('list', this.players)
       socket.broadcast.emit('new-player', socketPlayer)
       socket.on('msg', (msg, callback) => {
