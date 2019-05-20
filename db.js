@@ -1,5 +1,4 @@
 var store = require('./local_modules/store.js')
-//TODO synchro multiple collections query
 //FEATURE translate to other langs: https://github.com/projectfluent/fluent.js
 const accountData = {
     // email: 'fake@gmail.com',
