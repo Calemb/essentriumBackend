@@ -11,10 +11,14 @@ var sessionCfg = require('./local_modules/session.js')
 var routeTable = require('./routeTable.js')
 const chalk = require('chalk')
 var app = express();
-app.use(cors({
-  origin: ['http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3002'],
-  credentials: true
-}))
+
+const config = require('./config').prod
+if (config.appOrigin.length > 0) {
+  app.use(cors({
+    origin: config.appOrigin,
+    credentials: true
+  }))
+}
 
 app.use(cookieParser('keycat', {}));
 
@@ -56,12 +60,13 @@ app.use(express.static(path.join(__dirname, 'public/game')));
 
 
 var store = require('./local_modules/store.js')
-const port = 80
+const port = config.port
+
 server.listen(port, () => {
   console.log('Listening on: ' + port);
   store.connect()
 });
 const ioChat = require('./io-chat')
-ioChat.init(server)
+ioChat.init(server, config)
 
 module.exports = app;

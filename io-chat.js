@@ -6,10 +6,12 @@ const ioChat = {
   // citySockets:[],
   // locationSockets: [],
   players: [],
-  init: function (server) {
+  init: function (server, config) {
     this.io = require('socket.io')(server);
     const socketAuth = require('./local_modules/socket-authorization')
-    this.io.set('origins', "http://127.0.0.1:3002")
+    if (config.socketOrigins !== '') {
+      this.io.set('origins', config.socketOrigins)
+    }
     this.io.set('authorization', socketAuth);
 
     //read cities, guilds form server at start!
