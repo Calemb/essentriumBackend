@@ -12,7 +12,7 @@ var routeTable = require('./routeTable.js')
 const chalk = require('chalk')
 var app = express();
 
-const config = require('./config').prod
+const config = require('./config')
 if (config.appOrigin.length > 0) {
   app.use(cors({
     origin: config.appOrigin,
