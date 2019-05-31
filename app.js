@@ -34,23 +34,28 @@ app.use('/', require('./routes/index'));
 
 app.use('/login', require('./routes/login'));
 app.use('/game', require('./routes/game'));
+app.get('/news', (req, res, next) => {
+  const gameplay = require('./gameplay/admin/news')
+  gameplay.get(req, res, next)
+})
+
 const gameSubDir = 'public/game/'
 
 app.use('/game/:subGame', sessionCfg.strict,
-  (req, res, next) => {
-    var subGame = req.params.subGame
-    console.log(routeTable[subGame])
-    if (typeof routeTable[subGame] != 'undefined') {
-      var routeName = routeTable[subGame] === '' ? subGame : routeTable[subGame];
-      var subRoute = require('./routes/' + routeName)
-      res.__dirname = path.join(__dirname, gameSubDir)
-      subRoute(req, res, next)
-    }
-    else {
-      console.log(chalk.red(req.originalUrl + ' -> not permitted at routing whiteList'))
-      res.json({ msg: 'not permited at routing whiteList' })
-    }
+(req, res, next) => {
+  var subGame = req.params.subGame
+  console.log(routeTable[subGame])
+  if (typeof routeTable[subGame] != 'undefined') {
+    var routeName = routeTable[subGame] === '' ? subGame : routeTable[subGame];
+    var subRoute = require('./routes/' + routeName)
+    res.__dirname = path.join(__dirname, gameSubDir)
+    subRoute(req, res, next)
   }
+  else {
+    console.log(chalk.red(req.originalUrl + ' -> not permitted at routing whiteList'))
+    res.json({ msg: 'not permited at routing whiteList' })
+  }
+}
 );
 
 app.use('/logout', require('./routes/logout'));
