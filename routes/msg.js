@@ -7,6 +7,6 @@ const gameplay = require('../gameplay/msg')
 
 router.post('/', gameplay.sendMsg);
 router.get('/unreaded', gameplay.getUnreaded);
-//TODO INBOX!
+router.get('/msgs', gameplay.getMsgs);
 
 module.exports = router;
