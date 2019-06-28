@@ -3,10 +3,11 @@
 * NAME for pages default loding
 */
 routeTable = {
+    'admin': 'admin/index',
+    'news': 'admin/news',
     '_player': '',
     '_account': '',
     '_player-fast': '',
-    'news': 'admin/news',
     '_travel': '',
     'guild': '',
     'view': '',

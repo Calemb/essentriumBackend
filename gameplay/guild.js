@@ -227,6 +227,7 @@ const gameplay = {
                 res.json({ err, errRequests })
               } else {
                 console.log(requests.data);
+                //TODO WTF wait COunter ? make it async await!
                 let waitCounter = 0
                 result.members.forEach(member => {
                   waitCounter += 1

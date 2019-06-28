@@ -3,7 +3,6 @@ const MongoClient = mongo.MongoClient
 
 const store = {}
 store.db = {}
-
 store.ObjectId = (id) => {
     return mongo.ObjectId(id)
 }
