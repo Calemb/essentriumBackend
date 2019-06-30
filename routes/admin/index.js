@@ -6,4 +6,6 @@ router.get('/players', adminPlayers.getPlayers)
 
 router.post('/players', adminPlayers.postPlayer)
 
+router.delete('/players/:id', adminPlayers.deletePlayer)
+
 module.exports = router
