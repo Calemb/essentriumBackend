@@ -4,8 +4,7 @@ var account = require('../store/account.js')
 var sessionCookie = require('./session-cookie.js')
 
 var sessionVerify = function (req, res, next) {
-    // req.session.email = 'fake@gmail.com';
-    // req.session.email = 'calemb@gmail.com';
+    // req.session.email = 'fake@mail.com';
     // req.session.pass = '1234';
     console.log('session.js JUST inject fake session data!!!!!');
 
@@ -14,6 +13,9 @@ var sessionVerify = function (req, res, next) {
         typeof req.session.email !== 'undefined' &&
         req.session.email !== '') {
         // console.table(req.session)
+// bcrypt.compare(myPlaintextPassword, hash, function(err, res) {
+  //   // res == true
+  // })
         account.find(req.session.email, req.session.pass,
             (err, result) => {
                 // console.table(result)
