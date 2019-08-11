@@ -12,7 +12,7 @@ account.find = function (email, password, next) {
         //some internal error - let it go
         next(err, undefined)
       }
-      else {
+      else if (result) {
         bcrypt.compare(password, result.password, function (err, res) {
           console.log(res)
           if (err) {
@@ -26,6 +26,9 @@ account.find = function (email, password, next) {
             next(err, undefined)
           }
         })
+      }
+      else {
+        next(err, undefined)
       }
     })
 }
