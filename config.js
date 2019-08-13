@@ -12,4 +12,4 @@ const config = {
 }
 
 
-module.exports = config.dev
+module.exports = config.prod
