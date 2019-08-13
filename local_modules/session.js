@@ -23,7 +23,9 @@ var sessionVerify = function (req, res, next) {
                 if (result) {
                     console.log(chalk.yellow("session check method: " + req.method));
 
-                    if (result.priviliges.includes('preview') && req.method != 'GET') {
+                    if (typeof result.priviliges != 'undefined' &&
+                        result.priviliges.includes('preview') &&
+                        req.method != 'GET') {
                         res.json({ msg: 'PREVIEW ACCOUNT!' })
                     } else {
                         req.body._id = result._id
