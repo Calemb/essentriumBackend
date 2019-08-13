@@ -1,8 +1,10 @@
 var express = require('express');
 var router = express.Router();
-var sessionCfg = require('../local_modules/session.js')
+const bcrypt = require('bcrypt')
+
+var sessionCfg = require('../local_modules/session')
 /* GET users listing. */
-var account = require('../store/account.js')
+var account = require('../store/account')
 
 router.post('/', sessionCfg.plain, function (req, res, next) {
     var sess = req.session
@@ -15,7 +17,7 @@ router.post('/', sessionCfg.plain, function (req, res, next) {
         (err, result) => {
             console.log("Result is: " + result)
             if (result) {
-                sess.pass = result.password
+                sess.pass = req.body.password
                 sess.email = result.email //verify with db
                 res.json({
                     location: 'game'
