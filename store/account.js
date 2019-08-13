@@ -1,4 +1,4 @@
-var store = require('../local_modules/store.js')
+const store = require('../local_modules/store')
 const bcrypt = require('bcrypt')
 
 const account = {};
