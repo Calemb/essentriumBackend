@@ -1,26 +1,27 @@
-const store = require('./local_modules/store.js')
+const store = require('../local_modules/store.js')
 const bcrypt = require('bcrypt')
 const yargs = require('yargs')
 
 let createPlayer = function (argv) {
   const email = argv.email
-
+  const priviliges = argv.priviliges
   const name = argv.name
   let hashPass = argv.password
   const saltRounds = 1;
- 
+
   // bcrypt.compare(myPlaintextPassword, hash, function(err, res) {
   //   // res == true
   // });
 
   bcrypt.hash(hashPass, saltRounds)
-    .then((hash) => preparePlayerData(hash, email, name))
+    .then((hash) => preparePlayerData(hash, email, name, priviliges))
 }
 
-const preparePlayerData = function (hash, email, name) {
+const preparePlayerData = function (hash, email, name, priviliges) {
   const accountData = {
     email: email,
-    password: hash
+    password: hash,
+    priviliges: priviliges
   }
 
   console.table(accountData)
@@ -82,6 +83,11 @@ yargs.command({
       describe: 'Player name',
       demandOption: true,
       type: String
+    },
+    priviliges: {
+      describe: 'Privigliges',
+      demandOption: true,
+      type: Array
     }
   },
   handler: createPlayer
