@@ -29,8 +29,6 @@ const preparePlayerData = function (hash, email, name, priviliges) {
   store.connect((db) => { insertFakePlayer(accountData, name, db) })
 }
 
-//WORKING - make this script first entry to db with admin user! run it with parameter 
-//to not store password in git!
 // //https://www.npmjs.com/package/yargs
 //FEATURE translate to other langs: https://github.com/projectfluent/fluent.js
 
