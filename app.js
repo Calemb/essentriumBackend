@@ -40,8 +40,8 @@ app.get('/news', (req, res, next) => {
 })
 
 const gameSubDir = 'public/game/'
-
-app.use('/game/:subGame', sessionCfg.strict,
+//WORKING frontend talking to 'api' url, cause we want have api & page calls separated!
+app.use('/api/game/:subGame', sessionCfg.strict,
   (req, res, next) => {
     var subGame = req.params.subGame
     console.log(routeTable[subGame])
