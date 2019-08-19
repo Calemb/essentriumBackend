@@ -1,4 +1,4 @@
-const store = require('../local_modules/store.js')
+const store = require('../local_modules/store')
 const bcrypt = require('bcrypt')
 const yargs = require('yargs')
 
@@ -29,7 +29,6 @@ const preparePlayerData = function (hash, email, name, priviliges) {
   store.connect((db) => { insertFakePlayer(accountData, name, db) })
 }
 
-//WORKING - make this script first entry to db with admin user! run it with parameter to not store password in git!
 // //https://www.npmjs.com/package/yargs
 //FEATURE translate to other langs: https://github.com/projectfluent/fluent.js
 
@@ -85,7 +84,7 @@ yargs.command({
       type: String
     },
     priviliges: {
-      describe: 'Privigliges',
+      describe: 'privigliges',
       demandOption: true,
       type: Array
     }

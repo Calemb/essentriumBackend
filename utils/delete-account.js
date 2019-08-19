@@ -2,7 +2,6 @@ const store = require('../local_modules/store.js')
 const bcrypt = require('bcrypt')
 const yargs = require('yargs')
 
-//WORKING delete user and insert new data with priviliges
 let deletePlayer = function (argv) {
   const email = argv.email
   let search = {}
