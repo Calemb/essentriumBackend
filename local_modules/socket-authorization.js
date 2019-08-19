@@ -5,7 +5,6 @@ const player = require('../store/player')
 const socketAuthorization = (data, callback) => {
   const { settings } = require('./session-settings')
 
-  // console.log("Verify socket......")
   const parsedCookie = parseCookie(settings, data.headers.cookie)[settings.key]
   settings.store.get(parsedCookie, (err, session) => {
     if (err) {
@@ -19,10 +18,17 @@ const socketAuthorization = (data, callback) => {
         callback(new Error('Socket session not found!'), false)
       } else {
         account.find(session.email, session.pass, (err, result) => {
-          player.find(result._id, (err, resultPlayer) => {
-            data.player = { _id: result._id.toString(), name: resultPlayer.name }
-            callback(null, true)
-          })
+          if (err) {
+            callback(new Error(err), false)
+          }
+          else if (result) {
+            player.find(result._id, (err, resultPlayer) => {
+              data.player = { _id: result._id.toString(), name: resultPlayer.name }
+              callback(null, true)
+            })
+          } else {
+            callback(new Error({ msg: 'account not found' }), false)
+          }
         })
       }
     }
