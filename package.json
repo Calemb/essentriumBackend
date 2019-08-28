@@ -20,6 +20,7 @@
     "socket.io": "^2.2.0",
     "vue": "^2.6.8",
     "vue-server-renderer": "^2.6.8",
+    "xtend": "^4.0.2",
     "yargs": "^13.3.0"
   },
   "devDependencies": {

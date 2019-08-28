@@ -1,15 +1,14 @@
-const config = {
-  prod: {
-    port: 80,
-    socketOrigins: "",
-    appOrigin: []
-  },
-  dev: {
-    port: 3001,
-    socketOrigins: "http://127.0.0.1:3002",
-    appOrigin: ['http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3002', 'http://127.0.0.1:3003']
-  }
+const xtend = require('xtend')
+const data = require('./config-data')
+
+const baseConfigData = {
+  pageAfterLogin: '',
+  pageafterLogout: '',
+  port: 80,
+  socketOrigins: "",
+  appOrigin: []
 }
 
+const config = xtend(baseConfigData, data)
 
-module.exports = config.dev
+module.exports = config
