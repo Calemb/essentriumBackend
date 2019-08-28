@@ -1,19 +1,16 @@
 var express = require('express');
 var router = express.Router();
-var sessionCfg = require('../local_modules/session.js')
+const sessionCfg = require('../local_modules/session')
+const chalk = require('chalk')
+const config = require('../config')
 
-router.get('/', sessionCfg.strict, function (req, res, next) {
+router.post('/', sessionCfg.strict, function (req, res, next) {
     var sess = req.session
-    if (sess.email != '') //perform real check!
-    {
-        //delete session
-        delete sess.email
-    }
-    res
-        .json({
-            maill: sess.email
-        })
-        .end()
+    delete sess.email
+    delete sess.password
+
+    console.log(chalk.red("LOG OUT: " + sess.email))
+    res.json({ location: config.pageafterLogout })
 });
 
 module.exports = router;

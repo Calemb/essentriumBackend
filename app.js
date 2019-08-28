@@ -33,7 +33,10 @@ var server = Server(app);
 app.use('/', require('./routes/index'));
 
 app.use('/login', require('./routes/login'));
+app.use('/logout', require('./routes/logout'));
+
 app.use('/game', require('./routes/game'));
+
 app.get('/news', (req, res, next) => {
   const gameplay = require('./gameplay/admin/news')
   gameplay.get(req, res, next)
@@ -59,7 +62,6 @@ app.use('/api/game/:subGame', sessionCfg.strict,
   }
 );
 
-app.use('/logout', require('./routes/logout'));
 
 app.use(express.static(path.join(__dirname, 'public/main')));
 app.use(express.static(path.join(__dirname, 'public/game')));
