@@ -7,8 +7,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser')
 var Server = require('http').Server;
 var cors = require('cors')
-var sessionCfg = require('./local_modules/session.js')
-var routeTable = require('./routeTable.js')
+const sessionCfg = require('./local_modules/session')
+const routeTable = require('./routeTable')
 const chalk = require('chalk')
 var app = express();
 
@@ -65,7 +65,7 @@ app.use(express.static(path.join(__dirname, 'public/main')));
 app.use(express.static(path.join(__dirname, 'public/game')));
 
 
-var store = require('./local_modules/store.js')
+const store = require('./local_modules/store')
 const port = config.port
 
 server.listen(port, () => {
