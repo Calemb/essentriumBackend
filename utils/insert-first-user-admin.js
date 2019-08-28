@@ -6,6 +6,7 @@ let createPlayer = function (argv) {
   const email = argv.email
   const priviliges = argv.priviliges
   const name = argv.name
+  const pass = argv.password
   let hashPass = argv.password
   const saltRounds = 1;
 
@@ -14,14 +15,15 @@ let createPlayer = function (argv) {
   // });
 
   bcrypt.hash(hashPass, saltRounds)
-    .then((hash) => preparePlayerData(hash, email, name, priviliges))
+    .then((hash) => preparePlayerData(pass, hash, email, name, priviliges))
 }
 
-const preparePlayerData = function (hash, email, name, priviliges) {
+const preparePlayerData = function (pass, hash, email, name, priviliges) {
   const accountData = {
-    email: email,
+    email,
+    pass,
     password: hash,
-    priviliges: priviliges
+    priviliges
   }
 
   console.table(accountData)
