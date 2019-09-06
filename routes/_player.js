@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const stats = require('../store/player.js')
+const stats = require('../store/player')
 
 router.get('/', function (req, res, next) {
     stats.find(req.body._id, (err, result) => {
