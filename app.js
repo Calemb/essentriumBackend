@@ -1,17 +1,19 @@
 // http://stackoverflow.com/questions/25532692/how-to-share-sessions-with-socket-io-1-x-and-express-4-x
 // http://stackoverflow.com/questions/19106861/authorizing-and-handshaking-with-socket-io
 
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser')
-var Server = require('http').Server;
-var cors = require('cors')
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser')
+const Server = require('http').Server;
+const cors = require('cors')
 const sessionCfg = require('./local_modules/session')
 const routeTable = require('./routeTable')
 const chalk = require('chalk')
-var app = express();
-
+const app = express();
+//WORKING -> MSG, ale nie mam listy graczy ;(
+//WORKING testuj obecne funkcjonalności (czy mają pełen zakres - np read msg nie oznacza msg)
+//przy okazji wypracuj metody na zapytania do bazy i ustabilizuj model logiki bazowej (szkielet bazy? jednak użyć scheme?)
 const config = require('./config')
 if (config.appOrigin.length > 0) {
   app.use(cors({
@@ -26,7 +28,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
-var server = Server(app);
+const server = Server(app);
 
 
 //=>MAIN FRONTEND(nuxt page)
@@ -43,15 +45,15 @@ app.get('/news', (req, res, next) => {
 })
 
 const gameSubDir = 'public/game/'
-//WORKING frontend talking to 'api' url, cause we want have api & page calls separated!
+//ASSUME frontend talking to 'api' url, cause we want have api & page calls separated!
 app.use('/api/game/:subGame', sessionCfg.strict,
   (req, res, next) => {
-    var subGame = req.params.subGame
+    const subGame = req.params.subGame
     console.log(routeTable[subGame])
     console.log(chalk.green("subGame: " + subGame))
     if (typeof routeTable[subGame] != 'undefined') {
-      var routeName = routeTable[subGame] === '' ? subGame : routeTable[subGame];
-      var subRoute = require('./routes/' + routeName)
+      const routeName = routeTable[subGame] === '' ? subGame : routeTable[subGame];
+      const subRoute = require('./routes/' + routeName)
       res.__dirname = path.join(__dirname, gameSubDir)
       subRoute(req, res, next)
     }
@@ -68,10 +70,9 @@ app.use(express.static(path.join(__dirname, 'public/game')));
 
 
 const store = require('./local_modules/store')
-const port = config.port
 
-server.listen(port, () => {
-  console.log('Listening on: ' + port);
+server.listen(config.port, () => {
+  console.log('Listening on: ' + config.port);
   store.connect()
 });
 const ioChat = require('./io-chat')
