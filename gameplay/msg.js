@@ -1,24 +1,38 @@
-const store = require('../local_modules/store.js')
+const store = require('../local_modules/store')
+const xtend = require('xtend')
 const msgStore = store.db.collection('messages')
-
+//bussines object!
+//ASSUME msgs after send is unreaded
+//msg could be sended
+//getMsgs give back sended & received msgs
 const gameplay = {
+  markReaded: function (req, res, next) {
+    const id = store.ObjectId(req.body.id)
+
+    msgStore.updateOne({ _id: id, _recipientId: req.body._id }, {
+      $set: {
+        read: true
+      }
+    },
+      (err, result) => {
+        res.json({ err, result })
+      })
+  },
   sendMsg: async function (req, res, next) {
     const _recipientId = store.ObjectId(req.body.recipientId)
     const title = req.body.title
     const content = req.body.content
-    const adresser = req.body._id
-    const owner = adresser
+    const _adresserId = req.body._id
+    const owner = _adresserId
 
     const msg = {
-      read: false,
-      adresser,
+      _adresserId,
       _recipientId,
       owner,
       title,
       content
     }
-    const msg2 = JSON.parse(JSON.stringify(msg))
-    msg2.owner = _recipientId
+    const msg2 = xtend(msg, { owner: _recipientId, read: false })
 
     const msg1Promise = await gameplay.insertMsg(msg)
     const msg2Promise = await gameplay.insertMsg(msg2)
