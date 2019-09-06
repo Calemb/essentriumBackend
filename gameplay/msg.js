@@ -44,7 +44,6 @@ const gameplay = {
           res.json(results)
         }
       })
-    //should send back all msgs contents
   },
   insertMsg: (msg) => {
     return new Promise((resolve) => {

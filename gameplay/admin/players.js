@@ -1,7 +1,6 @@
 const store = require('../../local_modules/store')
 const players = store.db.collection('players')
 const accounts = store.db.collection('accounts')
-//WORKING layout
 const gameplay = {
   deletePlayer: async (req, res, next) => {
     //TODO delete all player data!!!! account, own things etc.....!!!
