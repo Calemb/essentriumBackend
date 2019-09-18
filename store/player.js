@@ -9,9 +9,8 @@ player.playersList = function () {
   })
 }
 player.find = function (id, next) {
+  const _id = store.ObjectId(id)
   store.db.collection('players')
-    .findOne({
-      _id: id
-    }, next)
+    .findOne({ _id }, next)
 }
 module.exports = player

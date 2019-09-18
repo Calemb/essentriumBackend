@@ -4,7 +4,12 @@ const MongoClient = mongo.MongoClient
 const store = {}
 store.db = {}
 store.ObjectId = (id) => {
-    return mongo.ObjectId(id)
+    if (typeof id !== 'object') {
+        return mongo.ObjectId(id)
+    }
+    else {
+        return id
+    }
 }
 store.connect = (callback) => {
     MongoClient.connect("mongodb://127.0.0.1/essentrium", function (err, db) {
