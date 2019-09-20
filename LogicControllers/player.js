@@ -19,9 +19,6 @@ const playerController = {
         resolve({ err, result })
       });
     })
-  },
-  idToName: function (playerId, callback) {
-    stats.find(playerId, callback)
   }
 }
 
