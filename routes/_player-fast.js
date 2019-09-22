@@ -6,7 +6,7 @@ const gameplay = require('../LogicControllers/player')
 const playerSmallView = { name: '', hp: '' }
 
 router.get('/', (req, res, next) => {
-    gameplay.GetLoggedPlayerStats(req).then(({ err, result }) => {
+    gameplay.GetLoggedPlayerStats(req, playerSmallView).then(({ err, result }) => {
         if (err) {
             //merge error with view
             res.json({ ...err, ...playerSmallView })
