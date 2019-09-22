@@ -1,12 +1,13 @@
 const express = require('express');
-const store = require('../local_modules/store.js')
-const accounts = store.db.collection('accounts')
 const router = express.Router()
-
+const gameplay = require('../LogicControllers/account')
 
 router.get('/', (req, res, next) => {
-  accounts.findOne({ _id: req.body._id }, (err, result) => {
-    res.json({ priviliges: result.priviliges })
+  gameplay.GetAccountPriviliges(req).then(response => {
+    if (response.err) { res.json(err) }
+    else {
+      res.json(response.priviliges)
+    }
   })
 })
 

@@ -2,6 +2,7 @@ const store = require('../local_modules/store')
 const bcrypt = require('bcrypt')
 
 const account = {};
+// account.find
 account.find = function (email, password, next) {
   // console.log("Find: ", email, password)
   store.db.collection('accounts')
