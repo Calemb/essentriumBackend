@@ -13,6 +13,11 @@ const stats = require('../store/player')
 // czy w pewnych wypadkach store nie bedzie musiał ogarniać wszystkich możliwch rodzajow zapytań per feature ? find, find one etc ?(będzie musiał)
 
 const playerController = {
+  GetPlayersList: function () {
+    return new Promise(resolve => {
+      stats.GetPlayersList().then(resolve);
+    })
+  },
   GetLoggedPlayerStats: function (req) {
     return new Promise(resolve => {
       stats.find(req.body._id, (err, result) => {
