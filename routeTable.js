@@ -10,6 +10,7 @@ routeTable = {
     '_account': '',
     '_player-fast': '',
     '_travel': '',
+    '_camp': '',
     'guild': '',
     'view': '',
     'msg': '',
