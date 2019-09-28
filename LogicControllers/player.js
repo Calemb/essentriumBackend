@@ -1,4 +1,4 @@
-const stats = require('../store/player')
+const playerStore = require('../store/player')
 
 //WORKING app layers
 // 4 sekcje:
@@ -15,12 +15,12 @@ const stats = require('../store/player')
 const playerController = {
   GetPlayersList: function () {
     return new Promise(resolve => {
-      stats.GetPlayersList().then(resolve);
+      playerStore.GetPlayersList().then(resolve);
     })
   },
   GetLoggedPlayerStats: function (req) {
     return new Promise(resolve => {
-      stats.find(req.body._id, (err, result) => {
+      playerStore.find(req.body._id, (err, result) => {
         resolve({ err, result })
       });
     })
