@@ -1,11 +1,7 @@
+const travelDomain = require('../domain/travel')
 const campStore = require('../store/camp')
 const travelStore = require('../store/travel')
 
-// rozdziel API pointy travel od camps
-// moze tutaj uda sie wydobyc obiekty dziedziny? + clean up na kodzie z travela
-
-// wywal store z tego miejsca -> DONE
-// dodaj promisy do storowych zapytan
 
 const travelController = {
   GetTravelData: function (req) {
@@ -55,68 +51,24 @@ const travelController = {
 }
 
 changeDirection = (req, res, requestedChange) => {
-  const inner = { minX: 0, maxX: 9, minY: 0, maxY: 9 }
+  const inner = travelDomain.GetInnerConstraints()
 
-  travelStore.find(req.body._id).then(result => {
+  travelStore.find(req.body._id).then(foundTravel => {
 
-    let err = result.err
-    let results = result.result
+    let err = foundTravel.err
+    let results = foundTravel.result
 
-    const result = results || {
-      coords: { x: 0, y: 0, z: 0 },
-      coordsInner: { x: 0, y: 0, z: 0 }
-    }
+    const result = results || travelDomain.GetZeroCoords()
 
-    const directionToCoords = {
-      'N': {
-        delta: { x: 0, y: 1, z: 0 },
-        inner: { x: result.coordsInner.x, y: inner.maxY }
-      },
-      'S': {
-        delta: { x: 0, y: -1, z: 0 },
-        inner: { x: result.coordsInner.x, y: inner.minY }
-      },
-      'E': {
-        delta: { x: 1, y: 0, z: 0 },
-        inner: { x: inner.minX, y: result.coordsInner.y }
-      },
-      'W': {
-        delta: { x: -1, y: 0, z: 0 },
-        inner: { x: inner.maxX, y: result.coordsInner.y }
-      },
-      'UP': {
-        delta: { x: 0, y: 0, z: -1 },
-        inner: result.coordsInner
-      },
-      'DOWN': {
-        delta: { x: 0, y: 0, z: 1 },
-        inner: result.coordsInner
-      }
-    }
-    const translate = directionToCoords[requestedChange].delta;
+    travelDomain.Init(result.coords, result.coordsInner)
     var updateObject = {};
-    // var newCoords;
 
     if (req.body.inner) {
-      console.table(result.coordsInner)
-      result.coordsInner.x += translate.x;
-      console.table(result.coordsInner)
-      result.coordsInner.x = Math.max(Math.min(result.coordsInner.x, inner.maxX), inner.minX);
-
-      result.coordsInner.y += translate.y;
-      result.coordsInner.y = Math.max(Math.min(result.coordsInner.y, inner.maxY), inner.minY);
-
-      updateObject.coordsInner = result.coordsInner;
+      travelDomain.MoveInner(requestedChange)
+      updateObject.coordsInner = travelDomain.coordsInner
     } else {
-      result.coords.x += translate.x;
-      result.coords.y += translate.y;
-      result.coords.z += translate.z;
-      console.log(result.coords.z)
-      if (isNaN(result.coords.z))
-        result.coords.z = 0;
-
-      updateObject.coords = result.coords;
-      updateObject.coordsInner = directionToCoords[requestedChange].inner;
+      updateObject.coords = travelDomain.coords;
+      updateObject.coordsInner = travelDomain.inner;
     }
 
     console.table(updateObject)
