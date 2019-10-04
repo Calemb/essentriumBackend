@@ -1,64 +1,92 @@
 const travelDomain = require('../domain/travel')
+
+const response = require('./_response-structure')
+
 const campStore = require('../store/camp')
 const travelStore = require('../store/travel')
 
 
 const travelController = {
-  GetTravelData: function (req) {
+  GetTravelData: async function (req) {
     return new Promise(resolve => {
-      travelStore.find(req.body._id).then(results => {
+      const travelCoords = await travelStore.find(req.body._id);
 
-        let err = results.err
-        let travelResult = results.result
+      let err = travelCoords.err
+      let travelResult = travelCoords.result
+
+      if (err) {
+        resolve(response(err, undefined))
+      }
+      else {
+        const campData = await campStore.find({ owner: req.body._id });
+
+        let err = campData.err
+        let campResult = campData.result
 
         if (err) {
-          resolve(err)
+          resolve(response(err, undefined))
         }
         else {
-          campStore.find({ owner: req.body._id }).then(result => {
-            let err = result.err
-            let campResult = result.result
-
-            if (err) {
-              resolve(err)
-            }
-            else {
-              resolve({
-                coords: travelResult ? travelResult.coords : {},
-                coordsInner: travelResult ? travelResult.coordsInner : {},
-                camp: campResult
-              })
-            }
-          })
+          resolve(response(undefined, {
+            coords: travelResult ? travelResult.coords : {},
+            coordsInner: travelResult ? travelResult.coordsInner : {},
+            camp: campResult
+          }))
         }
-      })
-
+      }
     })
   },
-  PostTravelData: function (req) {
-    const requestedChange = req.body.direction
-    const camp = req.body.camp
-    if (requestedChange) {
+  PostTravelData: async function (req) {
+    return new Promise(resolve => {
 
-      changeDirection(req, res, requestedChange);
-    }
+      const requestedChange = req.body.direction
+      if (requestedChange) {
+        const results = await changeDirection(req, requestedChange);
+        resolve(response(results))
+      }
+    })
+  },
+  SetupCamp: function (req) {
+    return new Promise(resolve => {
 
-    if (camp) {
+      const id = req.body._id
+      let travelCoords = await travelStore.find(id)
+      let err = travelCoords.err
+      let result = travelCoords.result
 
-      setupCamp(req.body._id, res);
-    }
+      if (err) { resolve({ err, undefined }) }
+      else {
+        const coords = result.coords
+        travelCoords = await travelStore.find(coords)
+
+        err = travelCoords.err
+        result = travelCoords.result
+
+        if (err) { resolve({ err, undefined }) }
+        else if (!result) {
+          //insert new if possible
+          travelCoords = await campStore.insert(id, coords)
+          let err = travelCoords.err
+          let result = travelCoords.result
+
+          resolve(response(err, result))
+        }
+      }
+    })
   }
 }
 
-changeDirection = (req, res, requestedChange) => {
-  const inner = travelDomain.GetInnerConstraints()
+changeDirection = async (req, requestedChange) => {
+  return new Promise(resolve => {
 
-  travelStore.find(req.body._id).then(foundTravel => {
+    const inner = travelDomain.GetInnerConstraints()
+
+    const foundTravel = await travelStore.find(req.body._id)
 
     let err = foundTravel.err
-    let results = foundTravel.result
+    let travelCoords = foundTravel.result
 
-    const result = results || travelDomain.GetZeroCoords()
+    const result = travelCoords || travelDomain.GetZeroCoords()
 
     travelDomain.Init(result.coords, result.coordsInner)
     var updateObject = {};
@@ -73,43 +101,13 @@ changeDirection = (req, res, requestedChange) => {
 
     console.table(updateObject)
 
-    travelStore.upsert(
+    const upsert = await travelStore.upsert(
       { '_id': req.body._id },
-      updateObject).then(results => {
-        res.json(updateObject)
-      })
+      updateObject
+    )
+    resolve(response(undefined, updateObject))
   })
-}
 
-
-setupCamp = (id, res) => {
-  travelStore.find(id).then(results => {//=> find my coords
-    let err = results.err
-    let result = results.result
-
-    if (err) { res.json(err) }
-    else {
-      const coords = result.coords
-      travelStore.find(coords).then(results => {//find camp at my current coords
-        err = results.err
-        result = results.result
-
-        if (err) { res.json(err) }
-        else if (!result) {
-          //insert new if possible
-          campStore.insert(id, coords).then(results => {
-            let err = results.err
-            let result = results.result
-
-            if (err) { res.json(err) }
-            else {
-              res.json(result)
-            }
-          })
-        }
-      });
-    }
-  });
 }
 
 

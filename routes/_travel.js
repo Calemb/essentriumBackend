@@ -5,16 +5,14 @@ const gameplay = require('../LogicControllers/travel')
 
 
 
-router.get('/', (req, res, next) => {
-  gameplay.GetTravelData().then(result => {
-    res.json(result)
-  })
+router.get('/', async (req, res, next) => {
+  const response = await gameplay.GetTravelData(req)
+  res.json(response)
 });
 
-router.post('/', (req, res, next) => {
-  gameplay.PostTravelData(req).then(result => {
-    res.json(result)
-  })
+router.post('/', async (req, res, next) => {
+  const response = await gameplay.PostTravelData(req)
+  res.json(response)
 })
 
 module.exports = router;
