@@ -1,47 +1,45 @@
-const store = require('../local_modules/store')
 const dice = require('../local_modules/dice')
-const players = store.db.collection('players')
+const response = require('./_response-structure')
+const playersStore = require('../store/player')
 
 const gameplay = {
-  fastFight: function (req, res, next) {
-    try {
-      gameplay.PrepareAndFight(req.body._id, req.body.enemyId, res)
+  fastFight: function (playerId, enemyId) {
+    return new Promise(resolve => {
+      gameplay.PrepareAndFight(playerId, enemyId)
         .then(result => {
-
-          res.status(200).json(result)
+          resolve(result)
         })
-    } catch (e) {
-      res.status(500).json({ msg: e })
-    }
+    })
   },
-  PrepareAndFight: async function (playerId, enemyId, res) {
-    console.log(enemyId)
-    const _enemyId = store.ObjectId(enemyId)
-    const attacker = gameplay.GetPlayer(playerId);
-    const defender = gameplay.GetPlayer(_enemyId);
+  PrepareAndFight: async function (playerId, enemyId) {
+    return new Promise(resolve => {
 
-    const fighters = await Promise.all([attacker, defender])
-    if (fighters[0].hp <= 0 || fighters[1].hp <= 0) {
-      return { msg: 'Cannot fight. One of  you is death!' }
-    } else {
+      console.log(enemyId)
 
-      const result = await gameplay.fastFightLogic(fighters[0], fighters[1])
-      // await attacker
-      // await defender
+      const attacker = gameplay.GetPlayer(playerId);
+      const defender = gameplay.GetPlayer(enemyId);
 
-      // console.log(attacker)
-      // console.log('should be synced!')
-      // return { attacker: result[0], defender: result[0] }
-      if (typeof result === 'undefined') {
-        console.log('DRAW!');
+      const fighters = await Promise.all([attacker, defender])
+      if (fighters[0].hp <= 0 || fighters[1].hp <= 0) {
+        return response({ msg: 'Cannot fight. One of  you is death!' }, undefined)
+      } else {
 
+        const result = await gameplay.fastFightLogic(fighters[0], fighters[1])
+
+        // console.log(attacker)
+        // console.log('should be synced!')
+        // return { attacker: result[0], defender: result[0] }
+        if (typeof result === 'undefined') {
+          console.log('DRAW!');
+
+        }
+        resolve(response(undefined, result))
       }
-      return result
-    }
+    })
   },
   GetPlayer: function (_id) {
     return new Promise(resolve => {
-      players.findOne({ _id }, (err, result) => {
+      playersStore.find(_id, (err, result) => {
         if (err) {
           resolve(err)
         }
@@ -87,13 +85,14 @@ const gameplay = {
   },
   updatePlayerHp: function (_id, newHp) {
     return new Promise(resolve => {
-      players.updateOne({ _id }, {
-        $set: {
-          hp: Math.max(newHp, 0)
-        }
-      }, () => {
-        resolve()
-      })
+      playersStore.updateOne({ _id },
+        {
+          $set: {
+            hp: Math.max(newHp, 0)
+          }
+        }).then(result => {
+          resolve()
+        })
     })
   },
   dealDamage: function (attacker, defender) {

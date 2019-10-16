@@ -1,10 +1,5 @@
 const campStore = require('../store/camp')
 
-// wywal store z tego miejsca -> DONE
-// dodaj promisy do storowych zapytan
-// rozdziel API pointy travel od camps
-// moze tutaj uda sie wydobyc obiekty dziedziny? + clean up na kodzie z travela
-
 const campController = {
   GetTravelData: function (req) {
     return new Promise(resolve => {

@@ -1,10 +1,16 @@
 
 var express = require('express');
-const store = require('../local_modules/store.js')
 var router = express.Router();
-const msgStore = store.db.collection('messages')
-const gameplay = require('../gameplay/fight')
+const gameplay = require('../LogicControllers/fight')
 
-router.post('/fast', gameplay.fastFight)
+router.post('/fast', (req, res, next) => {
+  try {
+    gameplay.fastFight(req.body._id, req.body.enemyId).then(result => {
+      res.json(result)
+    })
+  } catch (e) {
+    res.status(500).json({ err: e, results: undefined })
+  }
+})
 
 module.exports = router;
