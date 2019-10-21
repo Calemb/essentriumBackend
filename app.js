@@ -11,10 +11,8 @@ const sessionCfg = require('./local_modules/session')
 const routeTable = require('./routeTable')
 const chalk = require('chalk')
 const app = express();
-//WORKING -> MSG, ale nie mam listy graczy ;(
-//WORKING testuj obecne funkcjonalności (czy mają pełen zakres - np read msg nie oznacza msg)
-//przy okazji wypracuj metody na zapytania do bazy i ustabilizuj model logiki bazowej (szkielet bazy? jednak użyć scheme?)
 const config = require('./config')
+
 if (config.appOrigin.length > 0) {
   app.use(cors({
     origin: config.appOrigin,
