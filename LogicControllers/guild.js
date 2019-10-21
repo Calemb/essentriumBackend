@@ -1,55 +1,47 @@
-const store = require('../local_modules/store')
 const playerUtil = require('./player')
-const guild = store.db.collection('guilds')
 const chatMgr = require('../io-chat')
 const response = require('./_response-structure')
+const guildDomain = require('../domain/guild')
+
+const guildStore = require('../store/guild')
+
+const store = require('../local_modules/store')
+const guild = store.db.collection('guilds')
 //
 // INNER FUNCTIONS
 //
+//WORKING separate db requests from game logic!
 const findMemberWithId = function (members, searchedId) {
   return members.find(member => JSON.stringify(member._id) === JSON.stringify(searchedId))
 }
-const pullPlayerOutOfGuild = function (playerId, guildId) {
-  guild.findOne({ _id: guildId }, (err, foundGuild) => {
-    if (foundGuild) {
-      const playerObjectId = store.ObjectId(playerId)
-      //ASSUME [DB] -> fields that are ObjectId has name: '_id'
-      if (foundGuild.members.count > 1) {
-        //remove from members
-        guild.updateOne({ _id: foundGuild._id }, {
-          $pull: {
-            members: { _id: playerObjectId }
-          }
-        })
-        //ASSUME [GAMEPLAY] wont loose guild if founder leave
-        const { role } = findMemberWithId(foundGuild.members, playerId)
-        if (role === gameplay.ADMIN) {
+const pullPlayerOutOfGuild = async function (playerId, guildId) {
+  const foundGuild = await guildStore.findOneGuild(guildId)
 
-          //give admin to any random SUBADMIN
-          guild.updateOne({
-            "members.role": gameplay.SUB_ADMIN
-          },
-            {
-              $set: { "members.$.role": gameplay.ADMIN }
-            }, (err, result) => {
+  if (foundGuild) {
+    //ASSUME [DB] -> fields that are ObjectId has name: '_id'
+    if (foundGuild.members.count > 1) {
+      guildStore.removePlayerFromMembers(foundGuild._id, playerId)
 
-              console.log("try to set admin to random person", result)
-            })
-        }
-      } else {
-        //remove whole guild! this is the only member
-        guild.remove({ _id: foundGuild._id }, (err, removeResults) => {
-          console.log("remove guild!", err, removeResults)
-          chatMgr.RemoveNamespaceSocket(foundGuild.name)
-        })
+      //ASSUME [GAMEPLAY] wont loose guild if founder leave
+      const { role } = findMemberWithId(foundGuild.members, playerId)
+
+      if (role === guildDomain.roles.ADMIN) {
+        guildStore.giveNewRoleToAnyRandomWithOtherRole(guildDomain.roles.ADMIN, guildDomain.roles.SUB_ADMIN)
       }
+    } else {
+      //remove whole guild! this is the only member
+      const removeResults = await guildStore.removeGuild(foundGuild._id)
+
+      console.log("remove guild!", err, removeResults)
+      chatMgr.RemoveNamespaceSocket(foundGuild.name)
     }
-    else {
-      console.log('playe has no guild so far!');
-    }
-  })
+  }
+  else {
+    console.log('playe has no guild so far!');
+  }
 }
 const findMyGuild = function (id, resultCallback) {
+  //remove this for guildStore!
   const playerId = store.ObjectId(id)
   guild.findOne(
     {
@@ -62,69 +54,50 @@ const findMyGuild = function (id, resultCallback) {
   )
 }
 const gameplay = {
-  setRole: function (memberId, newRole, playerId) {
+  setRole: async function (memberId, newRole, playerId) {
     return new Promise(resolve => {
 
       //verify if req user is admin
       //verify if new role is admin/subadmin/member
       //set memberIu new role
-      findMyGuild(playerId, (err, result) => {
-        console.log(result);
+      const { result } = await guildStore.findGuildOfPlayer(playerId)
+      console.log(result);
 
-        const selfMember = findMemberWithId(result.members, playerId)
-        if (selfMember.role === gameplay.ADMIN && (
-          newRole === gameplay.ADMIN || newRole === gameplay.SUB_ADMIN || newRole === gameplay.MEMBER
-        )) {
-          guild.updateOne({
-            members: { $elemMatch: { _id: store.ObjectId(memberId) } }
-          }, {
-            $set: { 'members.$.role': newRole }
-          }, (err, findedUser) => {
-            resolve(response(err, findedUser))
-          })
-        }
-      })
+      const selfMember = findMemberWithId(result.members, playerId)
+
+      if (selfMember.role === guildDomain.roles.ADMIN && (
+        newRole === guildDomain.roles.ADMIN || newRole === guildDomain.roles.SUB_ADMIN || newRole === guildDomain.roles.MEMBER
+      )) {
+        const result = await guildStore.giveRoleForPlayer(memberId, newRole)
+
+        resolve(response(result.err, result.findedUser))
+      }
     })
   },
   requestDecision: function (decisionId, decision) {
     return new Promise(resolve => {
-
       console.log('my decision: ' + decision)
       console.log('id: ' + decisionId)
+
       //find request!
-      const requestIdObject = store.ObjectId(decisionId)
+      // const requestIdObject = store.ObjectId(decisionId)
 
       if (decision === 'accept') {
-        guild.findOne({ _id: requestIdObject }, (err, request) => {
+        const request = await guildStore.findOneGuild(decisionId)
+        const result = await guildStore.findGuildOfPlayer(request.playerId)
 
-          //find player current guild
-          guild.findOne({
-            members:
-            {
-              $elemMatch: { _id: store.ObjectId(request.playerId) }
-            }
-          }, (err, result) => {
-            if (result) {
-              pullPlayerOutOfGuild(request.playerId, result._id)
-            }
-            guild.updateOne({ _id: request.guildId }, {
-              $push: {
-                "members": { _id: request.playerId, role: gameplay.MEMBER }
-              }
-            }, (err, results) => {
-              console.log('modified' + results.modifiedCount, 'matched: ' + matchedCount)
-            })
-          })
-        })
+        if (result) {
+          pullPlayerOutOfGuild(request.playerId, result._id)
+        }
+
+        const result = await guildStore.addPlayerWithRole(request.guildId, request.playerId, guildDomain.roles.MEMBER)
       }
       else if (decision === 'deny') {
         //for now - do nth, just remove request from db in both cases
 
       }
-
-      guild.remove({ _id: store.ObjectId(decisionId) }, (err, result) => {
-        resolve({ err, result })
-      })
+      const results = await guildStore.removeDecision(decisionId)
+      resolve(results)
     })
   },
   ask: function (guildId, playerId, res) {
@@ -279,11 +252,6 @@ const gameplay = {
       })
     })
   },
-
-  //guild roles
-  ADMIN: 'admin',
-  SUB_ADMIN: 'subadmin',
-  MEMBER: 'member'
-
 }
+
 module.exports = gameplay

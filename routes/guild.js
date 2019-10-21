@@ -3,8 +3,6 @@ var router = express.Router();
 
 const gameplay = require('../LogicControllers/guild')
 
-//WORKING app layers -> separate
-
 router.delete('/:id', async (req, res, next) => {
   const result = gameplay.deleteGuild(req.params.id, req.body._id)
   res.json(result)
