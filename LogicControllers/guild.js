@@ -100,48 +100,37 @@ const gameplay = {
       resolve(results)
     })
   },
-  ask: function (guildId, playerId, res) {
+  ask: function (guildId, playerId) {
     //ASSUME [GAMEPLAY] cannot try join to same guild!
     return new Promise(resolve => {
       console.log('*** ask id ***')
       console.log('guild id: ' + guildId)
       //new entry with ask (can ask any nums of guild same time!)
-      const entry = {
-        guildId: store.ObjectId(guildId),
-        playerId: store.ObjectId(playerId)
+
+      const { total } = await guildStore.findJoinRequests(guildId, playerId)
+
+      if (total < 1) {
+        const newRequest = await guildStore.addJoinRequest(guildId, playerId)
+        resolve(newRequest)
+      } else {
+        resolve(response({ msg: 'Already sign up!' }, undefined))
       }
-      guild.find(entry).count((err, total) => {
-        if (total < 1) {
-          guild.insertOne(entry, (err, results) => {
-            resolve(err, results)
-          });
-        } else {
-          resolve(response({ msg: 'Already sign up!' }, undefined))
-        }
-      })
       console.log('*** ask id END ***')
     })
   },
-  deleteGuild: function (guildId, playerId) {
+  deleteGuild: function (guildId) {
     return new Promise(resolve => {
 
       console.log("*** DELETE ***")
       console.log('guild id: ' + guildId)
-      console.log('player id ' + store.ObjectId(playerId))
 
       //only delete this guild, where player has admin priviliges!
-      guild.findOne({
-        _id: store.ObjectId(guildId)
-      }, (err, findResult) => {
-        chatMgr.RemoveNamespaceSocket(findResult.name)
-      })
-      guild.remove({
-        _id: store.ObjectId(guildId),
-        members: { _id: store.ObjectId(playerId), role: 'admin' }
-      },
-        (err, result) => {
-          resolve(response(err, result))
-        })
+      const findResult = await guildStore.findOneGuild(guildId)
+      chatMgr.RemoveNamespaceSocket(findResult.name)
+
+      const result = await guildStore.removeGuild(guildId)
+      resolve(response(result.err, result.result))
+
       console.log("*** DELETE END ***")
     })
   },
