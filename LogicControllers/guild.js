@@ -137,36 +137,27 @@ const gameplay = {
   createGuild: function (playerId, guildName) {
     return new Promise(resolve => {
       console.log('CREATE NEW GUILD')
+      const { total } = await guildStore.findGuildByName(guildName)
 
-      guild
-        .find({ name: guildName })
-        .count((err, total) => {
-          if (total < 1) {
-            findMyGuild(playerId, (err, myGuild) => {
-              //player already has a guild!
-              if (myGuild) {
-                pullPlayerOutOfGuild(playerId, myGuild._id)
-              }
-              guild.insertOne(
-                {
-                  name: guildName,
-                  members: [{
-                    _id: playerId,
-                    role: 'admin'
-                  }]
-                },
-                (err, result) => {
-                  if (err) { resolve(response(err, undefined)) }
-                  else {
-                    chatMgr.AddNamespaceSocket(guildName)
-                    resolve(response(undefined, result))
-                  }
-                })
-            })
-          } else {
-            resolve(response({ msg: 'guild with that name already exists!' }, undefined))
-          }
-        })
+      if (total < 1) {
+        const myGuild = await guildStore.findGuildOfPlayer(playerId)
+
+        //player already has a guild!
+        if (myGuild) {
+          pullPlayerOutOfGuild(playerId, myGuild._id)
+        }
+        const result = await guildStore.insertNewGuild(guildName, playerId, guildDomain.roles.ADMIN)
+
+        if (result.err) {
+          resolve(response(result.err, undefined))
+        }
+        else {
+          chatMgr.AddNamespaceSocket(guildName)
+          resolve(response(undefined, result.result))
+        }
+      } else {
+        resolve(response({ msg: 'guild with that name already exists!' }, undefined))
+      }
     })
   },
   myGuild: function (playerId) {

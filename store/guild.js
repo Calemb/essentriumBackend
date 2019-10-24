@@ -3,6 +3,31 @@ const store = require('../local_modules/store')
 const guilds = store.db.collection('guilds')
 
 const guild = {
+  insertNewGuild: function (guildName, playerId, guildRole) {
+    return new Promise(resolve => {
+      guilds.insertOne(
+        {
+          name: guildName,
+          members: [{
+            _id: playerId,
+            role: guildRole
+          }]
+        },
+        (err, result) => {
+          resolve({ err, result })
+        }
+      )
+    })
+  },
+  findGuildByName: function (guildName) {
+    return new Promise(resolve => {
+      guilds
+        .find({ name: guildName })
+        .count((err, total) => {
+          resolve({ err, total })
+        })
+    })
+  },
   findJoinRequests: function (guildId, playerId) {
     const entry = {
       guildId: store.ObjectId(guildId),
@@ -103,7 +128,7 @@ const guild = {
   removeGuild: function (guildId) {
     return new Promise(resolve => {
       const guildId = store.ObjectId(guildId)
-      
+
       guilds.remove({ _id: guildId }, (err, removeResults) => {
         resolve({ err, removeResults })
       })
