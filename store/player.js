@@ -13,9 +13,17 @@ player.find = function (id, next) {
   const _id = store.ObjectId(id)
   players.findOne({ _id }, next)
 }
-player.updateOne = function (filter, data) {
+player.findById = function (playerId) {
   return new Promise(resolve => {
-    players.updateOne(filter, data, resolve)
+    players.findOne({ _id: store.ObjectId(playerId) }, (err, result) => {
+      resolve({ err, result })
+    })
   })
-}
+},
+
+  player.updateOne = function (filter, data) {
+    return new Promise(resolve => {
+      players.updateOne(filter, data, resolve)
+    })
+  }
 module.exports = player

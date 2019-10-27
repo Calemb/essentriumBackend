@@ -13,6 +13,13 @@ const playerStore = require('../store/player')
 // czy w pewnych wypadkach store nie bedzie musiał ogarniać wszystkich możliwch rodzajow zapytań per feature ? find, find one etc ?(będzie musiał)
 
 const playerController = {
+  IdToName: function (playerId) {
+    return new Promise(resolve => {
+      playerStore.findById(playerId).then(data => {
+        resolve(data)
+      })
+    })
+  },
   GetPlayersList: function () {
     return new Promise(resolve => {
       playerStore.GetPlayersList().then(resolve);

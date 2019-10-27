@@ -5,8 +5,6 @@ const guildDomain = require('../domain/guild')
 
 const guildStore = require('../store/guild')
 
-const store = require('../local_modules/store')
-const guild = store.db.collection('guilds')
 //
 // INNER FUNCTIONS
 //
@@ -40,19 +38,7 @@ const pullPlayerOutOfGuild = async function (playerId, guildId) {
     console.log('playe has no guild so far!');
   }
 }
-const findMyGuild = function (id, resultCallback) {
-  //remove this for guildStore!
-  const playerId = store.ObjectId(id)
-  guild.findOne(
-    {
-      members:
-      {
-        $elemMatch: { _id: playerId }
-      }
-    },
-    resultCallback
-  )
-}
+
 const gameplay = {
   setRole: async function (memberId, newRole, playerId) {
     return new Promise(resolve => {
@@ -165,73 +151,68 @@ const gameplay = {
 
       console.log("*** MY ***");
       //search only for playerguild
-      findMyGuild(playerId,
-        (err, result) => {
-          if (err) { resolve(response(err, undefined)) }
-          if (result) {
+      let result = await guildStore.findGuildOfPlayer(playerId);
+      if (result.err) { resolve(response(result.err, undefined)) }
+      if (result.result) {
+        result = result.result
 
-            const selfMember = findMemberWithId(result.members, playerId)
-            if (selfMember.role === 'admin' || selfMember.role === 'subadmin') {
-              guild.find({
-                guildId: result._id
-              }).toArray((errRequests, requests) => {
-                if (err || errRequests) {
-                  resolve(response({ err, errRequests }, undefined))
-                } else {
-                  console.log(requests.data);
-                  //TODO WTF wait COunter ? make it async await!
-                  let waitCounter = 0
-                  result.members.forEach(member => {
-                    waitCounter += 1
-                    playerUtil.idToName(member._id, (err, data) => {
-                      waitCounter -= 1
-                      member.name = data.name
-                      console.log(data.name);
-                      if (waitCounter == 0) {
-                        resolve(response(undefined, { guild: result, requests: requests }))
-                      }
-                    })
-                  })
-                }
-              })
-            }
-            else {
-              //JUST send my guild data
-              if (err) {
-                resolve(response(err, undefined))
-              } else {
-                let waitCounter = 0
-                //FEATURE [far] porwania innych graczy ale tlyko z guildi żeby miał ich kto odbijać! Musi być fun dla obu stron! zostawianie śladów, info że się przemieszczsacie dla porwanego
-                result.members.forEach(member => {
-                  waitCounter += 1
-                  playerUtil.idToName(member._id, (err, data) => {
-                    waitCounter -= 1
-                    member.name = data.name
-                    console.log(data.name);
-                    if (waitCounter == 0) {
-                      resolve(response(undefined, { guild: result }))
-                    }
-                  })
-                })
-              }
-            }
+        const selfMember = findMemberWithId(result.members, playerId)
+        if (selfMember.role === guildDomain.roles.ADMIN || selfMember.role === guildDomain.roles.SUB_ADMIN) {
+          const entries = await guildStore.findGuildEntries(result._id)
+          let errRequests = entries.errRequests
+
+          if (err || errRequests) {
+            resolve(response({ err, errRequests }, undefined))
+          } else {
+            console.log(requests.data);
+            //wait until all id will be turned into names
+            const result = await Promise.all(
+              result.members.map(
+                member => playerUtil.idToName(member._id)
+              )
+            )
+
+            forEach(member => {
+              member.name = result.filter(r => r._id == member._id).name
+            })
+
+            resolve(response(undefined, { guild: result, requests: requests }))
           }
-          else {
-            //there is no guild
-            resolve(response({ msg: 'No guild Data' }, undefined))
+        }
+        else {
+          //JUST send my guild data
+          if (err) {
+            resolve(response(err, undefined))
+          } else {
+            const result = await Promise.all(
+              result.members.map(
+                member => playerUtil.idToName(member._id)
+              )
+            )
+
+            forEach(member => {
+              member.name = result.filter(r => r._id == member._id).name
+            })
+
+            resolve(response(undefined, { guild: result }))
           }
-        })
+        }
+      }
+      else {
+        //there is no guild
+        resolve(response({ msg: 'No guild Data' }, undefined))
+      }
     })
   },
   allGuilds: function () {
     return new Promise(resolve => {
       console.log("*** ALL ***");
+      const { err, result } = await guildStore.findExistingGuilds()
 
-      guild.find({ name: { $exists: true } }).toArray((err, result) => {
-        resolve(response(err, result))
-      })
+      resolve(response(err, result))
     })
   },
 }
 
 module.exports = gameplay
+//FEATURE [far] porwania innych graczy ale tlyko z guildi żeby miał ich kto odbijać! Musi być fun dla obu stron! zostawianie śladów, info że się przemieszczsacie dla porwanego

@@ -98,6 +98,16 @@ const guild = {
       )
     })
   },
+  findGuildEntries: function (guildId) {
+    return new Promise(resolve => {
+
+      guilds.find({
+        guildId: guildId
+      }).toArray((errRequests, requests) => {
+        resolve({ errRequests, requests })
+      })
+    })
+  },
   findOneGuild: function (guildId) {
     return new Promise(resolve => {
       const guildIdObject = store.ObjectId(guildId)
@@ -131,6 +141,15 @@ const guild = {
 
       guilds.remove({ _id: guildId }, (err, removeResults) => {
         resolve({ err, removeResults })
+      })
+    })
+  },
+  findExistingGuilds: function () {
+    //because records in guilds collection could mean requests
+    //so we check if record has 'name' field
+    return new Promise(resolve => {
+      guilds.find({ name: { $exists: true } }).toArray((err, result) => {
+        resolve({ err, result })
       })
     })
   }
