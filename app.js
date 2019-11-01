@@ -71,7 +71,6 @@ const store = require('./local_modules/store')
 
 server.listen(config.port, () => {
   console.log('Listening on: ' + config.port);
-  store.connect()
 });
 const ioChat = require('./io-chat')
 ioChat.init(server, config)
