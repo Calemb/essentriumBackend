@@ -1,18 +1,23 @@
 const expect = require('chai').expect;
 const store = require('../local_modules/store')
 
-beforeEach(async function () {
-  await store.connect()
-});
-
-
-
-
 describe('guild', () => {
+
+  before(async () => {
+    await store.connect()
+  });
+
+  after(async () => {
+    await store.db.close()
+  });
+
+
   it('checks all guilds', async () => {
     const guild = require('../LogicControllers/guild')
-    const guilds = await guild.allGuilds()
+    const result = await guild.allGuilds()
+    // const result = { err: null, results: true }
 
-    expect(guilds).to.not.be.undefined;
+    expect(result.err).to.be.null;
+    expect(result.results).to.not.be.undefined;
   })
 })
