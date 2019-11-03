@@ -68,11 +68,15 @@ app.use(express.static(path.join(__dirname, 'public/game')));
 
 
 const store = require('./local_modules/store')
+store.connect().then(result => {
 
-server.listen(config.port, () => {
-  console.log('Listening on: ' + config.port);
-});
-const ioChat = require('./io-chat')
-ioChat.init(server, config)
+  server.listen(config.port, () => {
+
+    console.log('Listening on: ' + config.port);
+  })
+
+  const ioChat = require('./io-chat')
+  ioChat.init(server, config)
+})
 
 module.exports = app;

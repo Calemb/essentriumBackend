@@ -41,7 +41,7 @@ const pullPlayerOutOfGuild = async function (playerId, guildId) {
 
 const gameplay = {
   setRole: async function (memberId, newRole, playerId) {
-    return new Promise(resolve => {
+    return new Promise(async resolve => {
 
       //verify if req user is admin
       //verify if new role is admin/subadmin/member
@@ -60,8 +60,8 @@ const gameplay = {
       }
     })
   },
-  requestDecision: function (decisionId, decision) {
-    return new Promise(resolve => {
+  requestDecision: async function (decisionId, decision) {
+    return new Promise(async resolve => {
       console.log('my decision: ' + decision)
       console.log('id: ' + decisionId)
 
@@ -88,7 +88,7 @@ const gameplay = {
   },
   ask: function (guildId, playerId) {
     //ASSUME [GAMEPLAY] cannot try join to same guild!
-    return new Promise(resolve => {
+    return new Promise(async resolve => {
       console.log('*** ask id ***')
       console.log('guild id: ' + guildId)
       //new entry with ask (can ask any nums of guild same time!)
@@ -105,7 +105,7 @@ const gameplay = {
     })
   },
   deleteGuild: function (guildId) {
-    return new Promise(resolve => {
+    return new Promise(async resolve => {
 
       console.log("*** DELETE ***")
       console.log('guild id: ' + guildId)
@@ -121,7 +121,7 @@ const gameplay = {
     })
   },
   createGuild: function (playerId, guildName) {
-    return new Promise(resolve => {
+    return new Promise(async resolve => {
       console.log('CREATE NEW GUILD')
       const { total } = await guildStore.findGuildByName(guildName)
 
@@ -147,7 +147,7 @@ const gameplay = {
     })
   },
   myGuild: function (playerId) {
-    return new Promise(resolve => {
+    return new Promise(async resolve => {
 
       console.log("*** MY ***");
       //search only for playerguild
@@ -204,8 +204,8 @@ const gameplay = {
       }
     })
   },
-  allGuilds: function () {
-    return new Promise(resolve => {
+  allGuilds: async function () {
+    return new Promise(async resolve => {
       console.log("*** ALL ***");
       const { err, result } = await guildStore.findExistingGuilds()
 
