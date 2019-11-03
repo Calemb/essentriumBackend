@@ -15,21 +15,21 @@ const store = {
     }
   },
   connect: function () {
-    const that = this
-    return new Promise(resolve => {
-      console.log("Connecting to mongoDB......")
+    return new Promise((resolve, reject) => {
+      const that = this
+      // console.log("Connecting to mongoDB......")
 
       MongoClient.connect("mongodb://127.0.0.1/essentrium", function (err, client) {
         if (err) {
           resolve(err)
-          console.warn(err.message)
+          // console.warn(err.message)
         }
         else {
 
           that.db = client
 
           // console.log(that);
-          console.log("Connected to DB")
+          // console.log("Connected to DB")
 
           resolve(client)
         }

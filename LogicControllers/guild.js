@@ -206,9 +206,9 @@ const gameplay = {
   },
   allGuilds: async function () {
     return new Promise(async resolve => {
-      console.log("*** ALL ***");
+      // console.log("*** ALL ***");
       const { err, result } = await guildStore.findExistingGuilds()
-
+      // console.log(result)
       resolve(response(err, result))
     })
   },
