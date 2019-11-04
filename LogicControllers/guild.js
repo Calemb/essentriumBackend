@@ -149,7 +149,6 @@ const gameplay = {
   myGuild: function (playerId) {
     return new Promise(async resolve => {
 
-      console.log("*** MY ***");
       //search only for playerguild
       let result = await guildStore.findGuildOfPlayer(playerId);
       if (result.err) { resolve(response(result.err, undefined)) }

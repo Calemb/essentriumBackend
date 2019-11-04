@@ -6,6 +6,9 @@ const store = {
     //declare collection method for further use
     collection: function (name) { }
   },
+  CreateNeObjectId: function () {
+    return mongo.ObjectId()
+  },
   ObjectId: function (id) {
     if (typeof id !== 'object') {
       return mongo.ObjectId(id)
