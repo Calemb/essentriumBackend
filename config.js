@@ -6,7 +6,8 @@ const baseConfigData = {
   pageafterLogout: '',
   port: 80,
   socketOrigins: "",
-  appOrigin: []
+  appOrigin: [],
+  dbAdress: 'mongodb://127.0.0.1/essentrium'
 }
 
 const config = xtend(baseConfigData, data)

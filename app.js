@@ -68,7 +68,7 @@ app.use(express.static(path.join(__dirname, 'public/game')));
 
 
 const store = require('./local_modules/store')
-store.connect().then(result => {
+store.connect(config.dbAdress).then(result => {
 
   server.listen(config.port, () => {
 

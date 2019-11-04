@@ -1,11 +1,11 @@
 const expect = require('chai').expect;
 const store = require('../local_modules/store')
-
+const dbTestAdress = 'mongodb://127.0.0.1/essentriumTest'
 
 describe('guilds', () => {
 
   before(async () => {
-    await store.connect()
+    await store.connect(dbTestAdress)
   });
 
   after(async () => {
