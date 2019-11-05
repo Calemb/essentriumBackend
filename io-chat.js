@@ -1,6 +1,7 @@
 
 
 const ioChat = {
+  wasInitialized: false,
   io: {},
   namespaceSockets: [],
   // citySockets:[],
@@ -8,6 +9,7 @@ const ioChat = {
   players: [],
   init: function (server, config) {
     this.io = require('socket.io')(server);
+
     const socketAuth = require('./local_modules/socket-authorization')
     if (config.socketOrigins !== '') {
       this.io.set('origins', config.socketOrigins)
@@ -41,10 +43,14 @@ const ioChat = {
     this.AddNamespaceSocket('testCityName')
     this.AddNamespaceSocket('testGuildName')
     /***/
+
+    this.wasInitialized = true
   },
   AddNamespaceSocket: function (namespaceName) {
-    this.namespaceSockets[namespaceName] = this.io.of('/' + namespaceName)
-    this.PrepareSocket(this.namespaceSockets[namespaceName])
+    if (this.wasInitialized) {
+      this.namespaceSockets[namespaceName] = this.io.of('/' + namespaceName)
+      this.PrepareSocket(this.namespaceSockets[namespaceName])
+    }
   },
   RemoveNamespaceSocket: function (namespaceName) {
     delete this.namespaceSockets[namespaceName];

@@ -122,7 +122,6 @@ const gameplay = {
   },
   createGuild: function (playerId, guildName) {
     return new Promise(async resolve => {
-      console.log('CREATE NEW GUILD')
       const { total } = await guildStore.findGuildByName(guildName)
 
       if (total < 1) {
@@ -138,8 +137,10 @@ const gameplay = {
           resolve(response(result.err, undefined))
         }
         else {
+          // console.log(result.result.result);
+
           chatMgr.AddNamespaceSocket(guildName)
-          resolve(response(undefined, result.result))
+          resolve(response(null, result.result.result))
         }
       } else {
         resolve(response({ msg: 'guild with that name already exists!' }, undefined))
