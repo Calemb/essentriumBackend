@@ -14,12 +14,16 @@ describe('guilds', () => {
 
   before(async () => {
     await store.connect(dbTestAdress)
-  });
+  })
 
   after(async () => {
-    await clearDatabase()
+    // await clearDatabase()
     await store.db.close()
-  });
+  })
+  
+  afterEach(async () => {
+    await clearDatabase()
+  })
 
 
 
@@ -44,6 +48,26 @@ describe('guilds', () => {
     expect(myGuild.err.msg).to.not.be.empty
 
     expect(myGuild.results).to.be.undefined
+  })
+
+  
+  it('checks existed my guild', async () => {
+    const guild = require('../LogicControllers/guild')
+    const guildTestName = 'Example Guild Name'
+
+    const playerId = store.CreateNeObjectId();
+
+    const creation = await guild.createGuild(playerId, guildTestName)
+    const myGuild = await guild.myGuild(
+      playerId
+    );
+
+    expect(myGuild.err).to.be.null
+    
+    expect(myGuild.results.guild).to.have.property('_id')
+    
+
+    // expect(myGuild.results).to.be.undefined
   })
 
   it('create uniq named guild', async () => {

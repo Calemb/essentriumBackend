@@ -152,6 +152,7 @@ const gameplay = {
 
       //search only for playerguild
       let playerGuild = await guildStore.findGuildOfPlayer(playerId);
+
       if (playerGuild.err) { resolve(response(playerGuild.err, undefined)) }
       if (playerGuild.result) {
         playerGuild = playerGuild.result
@@ -160,6 +161,7 @@ const gameplay = {
         if (selfMember.role === guildDomain.roles.ADMIN || selfMember.role === guildDomain.roles.SUB_ADMIN) {
           const entries = await guildStore.findGuildEntries(playerGuild._id)
           let errRequests = entries.errRequests
+console.log(playerGuild);
 
           if (entries.err || errRequests) {
             resolve(response({ err, errRequests }, undefined))
@@ -170,12 +172,14 @@ const gameplay = {
                 member => playerUtil.IdToName(member._id)
               )
             )
+            there is no player in db so idTo name fails!
+console.log(result);
 
             playerGuild.members.forEach(member => {
               member.name = result.filter(r => r._id == member._id).name
             })
 
-            resolve(response(undefined, { guild: result, requests: entries }))
+            resolve(response(null, { guild: result, requests: entries }))
           }
         }
         else {
