@@ -151,32 +151,31 @@ const gameplay = {
     return new Promise(async resolve => {
 
       //search only for playerguild
-      let result = await guildStore.findGuildOfPlayer(playerId);
-      if (result.err) { resolve(response(result.err, undefined)) }
-      if (result.result) {
-        result = result.result
+      let playerGuild = await guildStore.findGuildOfPlayer(playerId);
+      if (playerGuild.err) { resolve(response(playerGuild.err, undefined)) }
+      if (playerGuild.result) {
+        playerGuild = playerGuild.result
 
-        const selfMember = findMemberWithId(result.members, playerId)
+        const selfMember = findMemberWithId(playerGuild.members, playerId)
         if (selfMember.role === guildDomain.roles.ADMIN || selfMember.role === guildDomain.roles.SUB_ADMIN) {
-          const entries = await guildStore.findGuildEntries(result._id)
+          const entries = await guildStore.findGuildEntries(playerGuild._id)
           let errRequests = entries.errRequests
 
-          if (err || errRequests) {
+          if (entries.err || errRequests) {
             resolve(response({ err, errRequests }, undefined))
           } else {
-            console.log(requests.data);
             //wait until all id will be turned into names
             const result = await Promise.all(
-              result.members.map(
-                member => playerUtil.idToName(member._id)
+              playerGuild.members.map(
+                member => playerUtil.IdToName(member._id)
               )
             )
 
-            forEach(member => {
+            playerGuild.members.forEach(member => {
               member.name = result.filter(r => r._id == member._id).name
             })
 
-            resolve(response(undefined, { guild: result, requests: requests }))
+            resolve(response(undefined, { guild: result, requests: entries }))
           }
         }
         else {
@@ -186,7 +185,7 @@ const gameplay = {
           } else {
             const result = await Promise.all(
               result.members.map(
-                member => playerUtil.idToName(member._id)
+                member => playerUtil.IdToName(member._id)
               )
             )
 

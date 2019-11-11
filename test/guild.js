@@ -56,4 +56,19 @@ describe('guilds', () => {
 
     expect(creation.results).to.not.be.undefined;
   })
+
+  it('remove existing guild', async () => {
+    const guild = require('../LogicControllers/guild')
+    const guildTestName = "Test name"
+    const playerId = store.ObjectId()
+    const testGuildCreation = await guild.createGuild(playerId, guildTestName)
+    const createdGuild = await guild.myGuild(playerId)
+    
+    console.log(createdGuild)
+    // const guildId 
+    //     const removeResult = await guild.removeGuild(guildId)
+
+    // expect(removeResult.err).to.be.null;
+
+  })
 })
