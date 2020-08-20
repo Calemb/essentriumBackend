@@ -6,7 +6,7 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "bcrypt": "^3.0.6",
+    "bcrypt": "^5.0.0",
     "cache-manager-redis-store": "^1.5.0",
     "connect-mongo": "^2.0.3",
     "cookie-parser": "^1.4.3",
